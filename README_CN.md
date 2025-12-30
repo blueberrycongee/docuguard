@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go" alt="Go Version">
-  <a href="https://github.com/blueberrycongee/docuguard/actions"><img src="https://github.com/blueberrycongee/docuguard/workflows/CI/badge.svg" alt="Build Status"></a>
+  <a href="https://github.com/blueberrycongee/docuguard/actions"><img src="https://github.com/blueberrycongee/docuguard/actions/workflows/ci.yml/badge.svg?branch=master" alt="Build Status"></a>
   <a href="https://goreportcard.com/report/github.com/blueberrycongee/docuguard"><img src="https://goreportcard.com/badge/github.com/blueberrycongee/docuguard" alt="Go Report Card"></a>
   <a href="https://pkg.go.dev/github.com/blueberrycongee/docuguard"><img src="https://pkg.go.dev/badge/github.com/blueberrycongee/docuguard.svg" alt="Go Reference"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
