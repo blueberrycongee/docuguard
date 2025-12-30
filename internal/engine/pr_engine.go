@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/yourname/docuguard/internal/config"
-	"github.com/yourname/docuguard/internal/git"
-	"github.com/yourname/docuguard/internal/llm"
-	"github.com/yourname/docuguard/internal/matcher"
-	"github.com/yourname/docuguard/internal/scanner"
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/internal/config"
+	"github.com/blueberrycongee/docuguard/internal/git"
+	"github.com/blueberrycongee/docuguard/internal/llm"
+	"github.com/blueberrycongee/docuguard/internal/matcher"
+	"github.com/blueberrycongee/docuguard/internal/scanner"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // PREngine handles PR-based documentation consistency checking.

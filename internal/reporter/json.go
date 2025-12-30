@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // JSONReporter JSON 格式报告

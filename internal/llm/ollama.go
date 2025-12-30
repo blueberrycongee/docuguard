@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // OllamaClient Ollama 本地模型客户端

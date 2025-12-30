@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/yourname/docuguard/internal/llm"
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/internal/llm"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // Matcher performs relevance matching between documents and code.

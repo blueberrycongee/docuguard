@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/fatih/color"
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // TextReporter outputs results in human-readable text format.

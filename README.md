@@ -1,7 +1,7 @@
 # DocuGuard
 
-[![Build Status](https://github.com/yourname/docuguard/workflows/CI/badge.svg)](https://github.com/yourname/docuguard/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/yourname/docuguard)](https://goreportcard.com/report/github.com/yourname/docuguard)
+[![Build Status](https://github.com/blueberrycongee/docuguard/workflows/CI/badge.svg)](https://github.com/blueberrycongee/docuguard/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/blueberrycongee/docuguard)](https://goreportcard.com/report/github.com/blueberrycongee/docuguard)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 English | [中文](README_CN.md)
@@ -26,12 +26,12 @@ A lightweight CLI tool for checking documentation-code consistency using LLM sem
 ### From Source
 
 ```bash
-go install github.com/yourname/docuguard/cmd/docuguard@latest
+go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 ```
 
 ### Binary
 
-Download from [Releases](https://github.com/yourname/docuguard/releases).
+Download from [Releases](https://github.com/blueberrycongee/docuguard/releases).
 
 ## Quick Start
 
@@ -222,7 +222,7 @@ jobs:
           go-version: "1.21"
 
       - name: Install DocuGuard
-        run: go install github.com/yourname/docuguard/cmd/docuguard@latest
+        run: go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
       - name: Run DocuGuard
         env:
@@ -258,7 +258,7 @@ jobs:
           go-version: "1.21"
 
       - name: Install DocuGuard
-        run: go install github.com/yourname/docuguard/cmd/docuguard@latest
+        run: go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
       - name: Check Documentation
         run: docuguard check --all --format github-actions

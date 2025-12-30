@@ -7,7 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // GoParser Go 代码解析器

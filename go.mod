@@ -1,4 +1,4 @@
-module github.com/yourname/docuguard
+module github.com/blueberrycongee/docuguard
 
 go 1.23.4
 

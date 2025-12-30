@@ -3,9 +3,9 @@ VERSION := $(shell git describe --tags --always --dirty 2>nul || echo "dev")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>nul || echo "unknown")
 BUILD_DATE := $(shell powershell -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ'" 2>nul || date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-LDFLAGS := -ldflags "-X github.com/yourname/docuguard/cli.Version=$(VERSION) \
-                     -X github.com/yourname/docuguard/cli.GitCommit=$(GIT_COMMIT) \
-                     -X github.com/yourname/docuguard/cli.BuildDate=$(BUILD_DATE)"
+LDFLAGS := -ldflags "-X github.com/blueberrycongee/docuguard/cli.Version=$(VERSION) \
+                     -X github.com/blueberrycongee/docuguard/cli.GitCommit=$(GIT_COMMIT) \
+                     -X github.com/blueberrycongee/docuguard/cli.BuildDate=$(BUILD_DATE)"
 
 .PHONY: build test lint clean install fmt
 

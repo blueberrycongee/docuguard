@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/yourname/docuguard/internal/config"
-	"github.com/yourname/docuguard/internal/engine"
-	"github.com/yourname/docuguard/internal/reporter"
+	"github.com/blueberrycongee/docuguard/internal/config"
+	"github.com/blueberrycongee/docuguard/internal/engine"
+	"github.com/blueberrycongee/docuguard/internal/reporter"
 )
 
 var (

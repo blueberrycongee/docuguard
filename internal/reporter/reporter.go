@@ -3,7 +3,7 @@ package reporter
 import (
 	"io"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // Reporter 报告输出接口

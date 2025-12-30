@@ -1,6 +1,6 @@
 package main
 
-import "github.com/yourname/docuguard/cli"
+import "github.com/blueberrycongee/docuguard/cli"
 
 func main() {
 	cli.Execute()

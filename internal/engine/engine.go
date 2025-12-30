@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yourname/docuguard/internal/config"
-	"github.com/yourname/docuguard/internal/llm"
-	"github.com/yourname/docuguard/internal/parser"
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/internal/config"
+	"github.com/blueberrycongee/docuguard/internal/llm"
+	"github.com/blueberrycongee/docuguard/internal/parser"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // Engine is the core consistency checking engine.

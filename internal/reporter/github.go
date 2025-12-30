@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // GitHubReporter GitHub Actions 格式报告

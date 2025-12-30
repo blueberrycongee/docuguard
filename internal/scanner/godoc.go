@@ -6,7 +6,7 @@ import (
 	"go/token"
 	"strings"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // ScanGoDoc scans a Go file and extracts documentation comments.

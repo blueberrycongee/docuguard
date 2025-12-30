@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // SymbolExtractor extracts changed symbols from git diffs.

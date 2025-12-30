@@ -3,7 +3,7 @@ package llm
 import (
 	"context"
 
-	"github.com/yourname/docuguard/pkg/types"
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // MockClient 测试用 Mock 客户端
