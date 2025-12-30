@@ -26,6 +26,8 @@ type PRCheckOptions struct {
 	DocPatterns []string
 	// SkipLLM skips LLM analysis and uses keyword matching only.
 	SkipLLM bool
+	// UseTwoStage enables two-stage matching (broad match + LLM relevance filter).
+	UseTwoStage bool
 }
 
 // NewPREngine creates a new PREngine with the given configuration.
@@ -69,7 +71,19 @@ func (e *PREngine) CheckFromDiff(ctx context.Context, diffContent string, opts P
 	}
 	report.TotalSegments = len(segments)
 
-	relevantPairs := matcher.QuickMatch(symbols, segments)
+	var relevantPairs []types.RelevanceResult
+
+	if opts.UseTwoStage && !opts.SkipLLM {
+		// Two-stage matching: broad match + LLM relevance filter
+		relevantPairs, err = e.twoStageMatch(ctx, symbols, segments)
+		if err != nil {
+			// Fallback to quick match on error
+			relevantPairs = matcher.QuickMatch(symbols, segments)
+		}
+	} else {
+		// Original quick match
+		relevantPairs = matcher.QuickMatch(symbols, segments)
+	}
 	report.RelevantPairs = len(relevantPairs)
 
 	for _, pair := range relevantPairs {
@@ -82,6 +96,58 @@ func (e *PREngine) CheckFromDiff(ctx context.Context, diffContent string, opts P
 
 	report.ExecutionTimeMs = time.Since(startTime).Milliseconds()
 	return report, nil
+}
+
+// twoStageMatch performs two-stage matching:
+// Stage 1: Broad keyword matching to find candidates
+// Stage 2: LLM batch relevance check to filter candidates
+func (e *PREngine) twoStageMatch(ctx context.Context, symbols []types.ChangedSymbol, segments []types.DocSegment) ([]types.RelevanceResult, error) {
+	// Stage 1: Broad match to get candidates
+	candidates := matcher.BroadMatch(symbols, segments)
+	if len(candidates) == 0 {
+		return nil, nil
+	}
+
+	// Group candidates by symbol for batch processing
+	groups := matcher.GroupCandidatesBySymbol(candidates)
+
+	var results []types.RelevanceResult
+
+	// Stage 2: LLM relevance check for each symbol
+	for _, group := range groups {
+		if len(group) == 0 {
+			continue
+		}
+
+		symbol := group[0].Symbol
+		candidateSegments := make([]types.DocSegment, len(group))
+		for i, c := range group {
+			candidateSegments[i] = c.Segment
+		}
+
+		// Batch relevance check
+		req := llm.RelevanceRequest{
+			Symbol:     symbol,
+			Candidates: candidateSegments,
+		}
+
+		relevantIndices, err := e.llmClient.CheckRelevanceBatch(ctx, req)
+		if err != nil {
+			// On error, include all candidates (conservative approach)
+			results = append(results, group...)
+			continue
+		}
+
+		// Only include relevant candidates
+		for _, idx := range relevantIndices {
+			if idx >= 0 && idx < len(group) {
+				group[idx].Reason = "LLM confirmed relevant"
+				results = append(results, group[idx])
+			}
+		}
+	}
+
+	return results, nil
 }
 
 // checkConsistency checks consistency between a document segment and code symbol.

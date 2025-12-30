@@ -33,3 +33,8 @@ func (c *OllamaClient) Analyze(ctx context.Context, req AnalyzeRequest) (*types.
 	// TODO: 实现 Ollama API 调用
 	return nil, fmt.Errorf("ollama client not implemented yet")
 }
+
+func (c *OllamaClient) CheckRelevanceBatch(ctx context.Context, req RelevanceRequest) ([]int, error) {
+	// TODO: 实现 Ollama API 调用
+	return nil, fmt.Errorf("ollama client not implemented yet")
+}

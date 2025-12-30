@@ -10,6 +10,8 @@ import (
 type Client interface {
 	// Analyze 分析文档与代码的一致性
 	Analyze(ctx context.Context, req AnalyzeRequest) (*types.CheckResult, error)
+	// CheckRelevanceBatch 批量检查文档段落与代码符号的相关性
+	CheckRelevanceBatch(ctx context.Context, req RelevanceRequest) ([]int, error)
 	// Name 返回客户端名称
 	Name() string
 }

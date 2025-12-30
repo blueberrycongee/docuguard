@@ -8,8 +8,9 @@ import (
 
 // MockClient 测试用 Mock 客户端
 type MockClient struct {
-	Result *types.CheckResult
-	Err    error
+	Result           *types.CheckResult
+	RelevantIndices  []int
+	Err              error
 }
 
 func NewMockClient(result *types.CheckResult, err error) *MockClient {
@@ -25,4 +26,11 @@ func (c *MockClient) Analyze(ctx context.Context, req AnalyzeRequest) (*types.Ch
 		return nil, c.Err
 	}
 	return c.Result, nil
+}
+
+func (c *MockClient) CheckRelevanceBatch(ctx context.Context, req RelevanceRequest) ([]int, error) {
+	if c.Err != nil {
+		return nil, c.Err
+	}
+	return c.RelevantIndices, nil
 }

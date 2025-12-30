@@ -35,3 +35,8 @@ func (c *AnthropicClient) Analyze(ctx context.Context, req AnalyzeRequest) (*typ
 	// TODO: 实现 Anthropic API 调用
 	return nil, fmt.Errorf("anthropic client not implemented yet")
 }
+
+func (c *AnthropicClient) CheckRelevanceBatch(ctx context.Context, req RelevanceRequest) ([]int, error) {
+	// TODO: 实现 Anthropic API 调用
+	return nil, fmt.Errorf("anthropic client not implemented yet")
+}

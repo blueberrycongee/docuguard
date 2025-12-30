@@ -23,6 +23,7 @@ var (
 	prFormat     string
 	prDocs       []string
 	prSkipLLM    bool
+	prTwoStage   bool
 	prGitHub     bool
 	prNumber     int
 	prToken      string
@@ -53,6 +54,7 @@ func init() {
 	prCmd.Flags().StringVar(&prFormat, "format", "text", "output format (text|json)")
 	prCmd.Flags().StringSliceVar(&prDocs, "docs", []string{"README.md", "docs/**/*.md"}, "documentation patterns to scan")
 	prCmd.Flags().BoolVar(&prSkipLLM, "skip-llm", false, "skip LLM check, use keyword matching only")
+	prCmd.Flags().BoolVar(&prTwoStage, "two-stage", false, "use two-stage matching (broad match + LLM relevance filter)")
 
 	prCmd.Flags().BoolVar(&prGitHub, "github", false, "enable GitHub mode")
 	prCmd.Flags().IntVar(&prNumber, "pr", 0, "PR number (required in GitHub mode)")
@@ -165,6 +167,7 @@ func runPRWithLLM(cfg *config.Config, diff string) error {
 		BaseBranch:  prBaseBranch,
 		DocPatterns: prDocs,
 		SkipLLM:     prSkipLLM,
+		UseTwoStage: prTwoStage,
 	}
 
 	report, err := prEngine.CheckFromDiff(ctx, diff, opts)
