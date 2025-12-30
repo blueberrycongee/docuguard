@@ -1,27 +1,30 @@
 # DocuGuard
 
-[![Build Status](https://github.com/blueberrycongee/docuguard/workflows/CI/badge.svg)](https://github.com/blueberrycongee/docuguard/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/blueberrycongee/docuguard)](https://goreportcard.com/report/github.com/blueberrycongee/docuguard)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go" alt="Go Version">
+  <a href="https://github.com/blueberrycongee/docuguard/actions"><img src="https://github.com/blueberrycongee/docuguard/workflows/CI/badge.svg" alt="Build Status"></a>
+  <a href="https://goreportcard.com/report/github.com/blueberrycongee/docuguard"><img src="https://goreportcard.com/badge/github.com/blueberrycongee/docuguard" alt="Go Report Card"></a>
+  <a href="https://pkg.go.dev/github.com/blueberrycongee/docuguard"><img src="https://pkg.go.dev/badge/github.com/blueberrycongee/docuguard.svg" alt="Go Reference"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+</p>
 
-English | [中文](README_CN.md)
+<p align="center">
+  <b>English</b> | <a href="README_CN.md">中文</a>
+</p>
 
-A lightweight CLI tool for checking documentation-code consistency using LLM semantic analysis.
+> A lightweight CLI tool for checking documentation-code consistency using LLM semantic analysis.
 
-## Features
+## ✨ Features
 
-- Detects inconsistencies between documentation and code implementation
-- **PR Bot Mode**: Automatically checks PRs for documentation that may need updates
-- Supports binding annotations in Markdown files
-- Multiple output formats: text, JSON, GitHub Actions
-- Configurable via YAML
-- CI/CD integration ready
+- 🔍 **Smart Detection** - Detects inconsistencies between documentation and code implementation
+- 🤖 **PR Bot Mode** - Automatically checks PRs for documentation that may need updates
+- 🎯 **Two-Stage Matching** - Broad keyword matching + LLM relevance filtering for accurate results
+- 📝 **Annotation Support** - Supports binding annotations in Markdown files
+- 📊 **Multiple Formats** - Output in text, JSON, or GitHub Actions format
+- ⚙️ **Configurable** - Flexible YAML configuration
+- 🔄 **CI/CD Ready** - Easy integration with GitHub Actions
 
-## Requirements
-
-- Go 1.21+
-
-## Installation
+## 📦 Installation
 
 ### From Source
 
@@ -33,23 +36,34 @@ go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
 Download from [Releases](https://github.com/blueberrycongee/docuguard/releases).
 
-## Quick Start
+### Requirements
 
-DocuGuard supports two modes:
+- Go 1.21+
+- OpenAI API key (or compatible API)
 
-### Mode 1: Annotation-Based Check
+## 🚀 Quick Start
 
-Manually bind documentation to code using annotations.
+### PR Bot Mode (Recommended)
 
-#### 1. Initialize
+Automatically detect code changes and find related documentation.
 
 ```bash
-docuguard init
+# Compare current branch vs main
+docuguard pr
+
+# Use two-stage matching for better accuracy
+docuguard pr --two-stage
+
+# Specify base branch
+docuguard pr --base develop
+
+# Only show detected changes (dry run)
+docuguard pr --dry-run
 ```
 
-#### 2. Add Binding
+### Annotation-Based Check
 
-In your Markdown file:
+Manually bind documentation to code using annotations.
 
 ```markdown
 <!-- docuguard:start -->
@@ -60,59 +74,26 @@ Orders over $100 qualify for free shipping.
 <!-- docuguard:end -->
 ```
 
-#### 3. Run Check
-
 ```bash
 docuguard check docs/api.md
 ```
 
-### Mode 2: PR Bot Mode (Recommended)
+## ⚙️ Configuration
 
-Automatically detect code changes and find related documentation.
-
-#### Local Development
-
-```bash
-# Compare current branch vs main
-docuguard pr
-
-# Specify base branch
-docuguard pr --base main
-
-# Compare last 3 commits
-docuguard pr --base HEAD~3
-
-# Only show detected changes (dry run)
-docuguard pr --dry-run
-
-# Skip LLM, use keyword matching only
-docuguard pr --skip-llm
-```
-
-#### GitHub CI
-
-```bash
-# Check specific PR
-docuguard pr --github --pr 123
-
-# Post comment on PR
-docuguard pr --github --pr 123 --comment
-```
-
-## Configuration
-
-Create `.docuguard.yaml`:
+Create `.docuguard.yaml` in your project root:
 
 ```yaml
 version: "1.0"
 
 llm:
-  provider: "openai"
+  provider: "openai"        # openai, anthropic, ollama
   model: "gpt-4"
+  base_url: ""              # Optional: custom API endpoint
   timeout: "60s"
 
 scan:
   include:
+    - "README.md"
     - "docs/**/*.md"
   exclude: []
 
@@ -121,7 +102,7 @@ rules:
   confidence_threshold: 0.8
 
 output:
-  format: "text"
+  format: "text"            # text, json, github-actions
   color: true
 ```
 
@@ -129,13 +110,39 @@ Set your API key:
 
 ```bash
 export OPENAI_API_KEY=your-api-key
+
+# Or use custom endpoint (e.g., Azure OpenAI, SiliconFlow)
+export OPENAI_API_BASE=https://your-api-endpoint
 ```
 
-## Commands
+## 📖 Commands
 
-### docuguard check
+### `docuguard pr`
 
-Check documentation-code consistency using annotations.
+Check documentation consistency for PR/code changes.
+
+```bash
+docuguard pr [flags]
+
+Flags:
+  --base string       Base branch for comparison (default "main")
+  --docs strings      Documentation patterns (default [README.md,docs/**/*.md])
+  --dry-run           Only show detected changes, skip LLM check
+  --skip-llm          Skip LLM, use keyword matching only
+  --two-stage         Use two-stage matching (broad match + LLM filter)
+  --format string     Output format: text, json (default "text")
+
+GitHub Mode:
+  --github            Enable GitHub mode
+  --pr int            PR number (required in GitHub mode)
+  --token string      GitHub token (or use GITHUB_TOKEN env)
+  --repo string       Repository owner/repo (auto-detected)
+  --comment           Post comment on PR
+```
+
+### `docuguard check`
+
+Check documentation using binding annotations.
 
 ```bash
 docuguard check [files...]
@@ -143,32 +150,7 @@ docuguard check --all
 docuguard check --format json docs/api.md
 ```
 
-### docuguard pr
-
-Check documentation consistency for PR changes.
-
-```bash
-# Local mode
-docuguard pr [flags]
-
-Flags:
-  --base string     Base branch for comparison (default "main")
-  --docs strings    Documentation patterns to scan (default [README.md,docs/**/*.md])
-  --dry-run         Only show detected changes
-  --skip-llm        Skip LLM check, use keyword matching only
-  --format string   Output format: text, json (default "text")
-
-# GitHub mode
-docuguard pr --github [flags]
-
-Flags:
-  --pr int          PR number (required)
-  --token string    GitHub token (or use GITHUB_TOKEN env)
-  --repo string     Repository owner/repo (auto-detected)
-  --comment         Post comment on PR
-```
-
-### docuguard init
+### `docuguard init`
 
 Initialize configuration file.
 
@@ -176,7 +158,19 @@ Initialize configuration file.
 docuguard init
 ```
 
-## Supported Bindings
+## 🔧 How It Works
+
+### Two-Stage Matching (Recommended)
+
+```
+Code Changes → Extract Symbols → [Stage 1: Broad Match] → Candidates → [Stage 2: LLM Filter] → Relevant Docs → [Stage 3: Consistency Check]
+```
+
+1. **Stage 1 - Broad Match**: Uses multiple strategies (exact name, code blocks, keywords, partial match) to find candidate documents
+2. **Stage 2 - LLM Filter**: Batch checks candidates with LLM to filter truly relevant documents
+3. **Stage 3 - Consistency Check**: Verifies if documentation matches code implementation
+
+### Supported Bindings
 
 | Type | Syntax |
 |------|--------|
@@ -185,20 +179,12 @@ docuguard init
 | Const | `const="ConstName"` |
 | Var | `var="VarName"` |
 
-## Output Formats
-
-- `text` - Human-readable output (default)
-- `json` - Machine-readable JSON
-- `github-actions` - GitHub Actions annotations
-
-## CI/CD Integration
+## 🔄 CI/CD Integration
 
 ### GitHub Actions (PR Bot)
 
-Add to your workflow (`.github/workflows/docuguard.yml`):
-
 ```yaml
-name: Documentation Check
+name: DocuGuard
 
 on:
   pull_request:
@@ -216,15 +202,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.21"
 
       - name: Install DocuGuard
         run: go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
-      - name: Run DocuGuard
+      - name: Check Documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -232,13 +217,14 @@ jobs:
           docuguard pr \
             --github \
             --pr ${{ github.event.pull_request.number }} \
+            --two-stage \
             --comment
 ```
 
 ### GitHub Actions (Annotation Mode)
 
 ```yaml
-name: Documentation Check
+name: DocuGuard Check
 
 on:
   push:
@@ -252,8 +238,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.21"
 
@@ -261,24 +246,33 @@ jobs:
         run: go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
       - name: Check Documentation
-        run: docuguard check --all --format github-actions
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: docuguard check --all --format github-actions
 ```
 
-## How PR Bot Works
+## 🤝 Contributing
 
-1. Detects code changes from git diff
-2. Extracts changed Go symbols (functions, structs, etc.)
-3. Scans documentation files (README.md, docs/*.md)
-4. Uses keyword matching to find related documentation
-5. Optionally uses LLM to verify consistency
-6. Reports findings or posts PR comment
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a Pull Request.
 
-## Contributing
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+## 📄 License
 
-## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-MIT
+## 🙏 Acknowledgments
+
+- [spf13/cobra](https://github.com/spf13/cobra) - CLI framework
+- [spf13/viper](https://github.com/spf13/viper) - Configuration management
+- OpenAI - LLM API
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/blueberrycongee">blueberrycongee</a>
+</p>

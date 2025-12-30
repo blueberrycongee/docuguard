@@ -1,27 +1,30 @@
 # DocuGuard
 
-[![Build Status](https://github.com/blueberrycongee/docuguard/workflows/CI/badge.svg)](https://github.com/blueberrycongee/docuguard/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/blueberrycongee/docuguard)](https://goreportcard.com/report/github.com/blueberrycongee/docuguard)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go" alt="Go Version">
+  <a href="https://github.com/blueberrycongee/docuguard/actions"><img src="https://github.com/blueberrycongee/docuguard/workflows/CI/badge.svg" alt="Build Status"></a>
+  <a href="https://goreportcard.com/report/github.com/blueberrycongee/docuguard"><img src="https://goreportcard.com/badge/github.com/blueberrycongee/docuguard" alt="Go Report Card"></a>
+  <a href="https://pkg.go.dev/github.com/blueberrycongee/docuguard"><img src="https://pkg.go.dev/badge/github.com/blueberrycongee/docuguard.svg" alt="Go Reference"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+</p>
 
-[English](README.md) | 中文
+<p align="center">
+  <a href="README.md">English</a> | <b>中文</b>
+</p>
 
-轻量级文档-代码一致性检查工具，基于 LLM 语义分析自动检测文档与代码实现之间的冲突。
+> 轻量级文档-代码一致性检查工具，基于 LLM 语义分析自动检测文档与代码实现之间的冲突。
 
-## 特性
+## ✨ 特性
 
-- 自动检测文档描述与代码实现的不一致
-- **PR Bot 模式**：自动检查 PR 中可能需要更新的文档
-- 支持 Markdown 文件中的绑定注解
-- 多种输出格式：文本、JSON、GitHub Actions
-- YAML 配置文件
-- 支持 CI/CD 集成
+- 🔍 **智能检测** - 自动检测文档描述与代码实现的不一致
+- 🤖 **PR Bot 模式** - 自动检查 PR 中可能需要更新的文档
+- 🎯 **两阶段匹配** - 宽松关键词匹配 + LLM 相关性过滤，提高准确率
+- 📝 **注解支持** - 支持 Markdown 文件中的绑定注解
+- 📊 **多种格式** - 支持文本、JSON、GitHub Actions 输出格式
+- ⚙️ **灵活配置** - YAML 配置文件
+- 🔄 **CI/CD 就绪** - 轻松集成 GitHub Actions
 
-## 环境要求
-
-- Go 1.21+
-
-## 安装
+## 📦 安装
 
 ### 从源码安装
 
@@ -33,23 +36,34 @@ go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
 从 [Releases](https://github.com/blueberrycongee/docuguard/releases) 页面下载。
 
-## 快速开始
+### 环境要求
 
-DocuGuard 支持两种模式：
+- Go 1.21+
+- OpenAI API Key（或兼容的 API）
 
-### 模式一：注解绑定检查
+## 🚀 快速开始
 
-通过注解手动绑定文档与代码。
+### PR Bot 模式（推荐）
 
-#### 1. 初始化配置
+自动检测代码变更并查找相关文档。
 
 ```bash
-docuguard init
+# 比较当前分支与 main
+docuguard pr
+
+# 使用两阶段匹配提高准确率
+docuguard pr --two-stage
+
+# 指定基准分支
+docuguard pr --base develop
+
+# 仅显示检测到的变更（dry run）
+docuguard pr --dry-run
 ```
 
-#### 2. 添加绑定注解
+### 注解绑定检查
 
-在 Markdown 文件中添加：
+通过注解手动绑定文档与代码。
 
 ```markdown
 <!-- docuguard:start -->
@@ -60,59 +74,26 @@ docuguard init
 <!-- docuguard:end -->
 ```
 
-#### 3. 运行检查
-
 ```bash
 docuguard check docs/api.md
 ```
 
-### 模式二：PR Bot 模式（推荐）
+## ⚙️ 配置说明
 
-自动检测代码变更并查找相关文档。
-
-#### 本地开发
-
-```bash
-# 比较当前分支与 main
-docuguard pr
-
-# 指定基准分支
-docuguard pr --base main
-
-# 比较最近 3 个提交
-docuguard pr --base HEAD~3
-
-# 仅显示检测到的变更（dry run）
-docuguard pr --dry-run
-
-# 跳过 LLM，仅使用关键词匹配
-docuguard pr --skip-llm
-```
-
-#### GitHub CI
-
-```bash
-# 检查指定 PR
-docuguard pr --github --pr 123
-
-# 在 PR 上发表评论
-docuguard pr --github --pr 123 --comment
-```
-
-## 配置说明
-
-创建 `.docuguard.yaml`：
+在项目根目录创建 `.docuguard.yaml`：
 
 ```yaml
 version: "1.0"
 
 llm:
-  provider: "openai"
+  provider: "openai"        # openai, anthropic, ollama
   model: "gpt-4"
+  base_url: ""              # 可选：自定义 API 端点
   timeout: "60s"
 
 scan:
   include:
+    - "README.md"
     - "docs/**/*.md"
   exclude: []
 
@@ -121,7 +102,7 @@ rules:
   confidence_threshold: 0.8
 
 output:
-  format: "text"
+  format: "text"            # text, json, github-actions
   color: true
 ```
 
@@ -129,13 +110,39 @@ output:
 
 ```bash
 export OPENAI_API_KEY=your-api-key
+
+# 或使用自定义端点（如 Azure OpenAI、SiliconFlow）
+export OPENAI_API_BASE=https://your-api-endpoint
 ```
 
-## 命令说明
+## 📖 命令说明
 
-### docuguard check
+### `docuguard pr`
 
-使用注解检查文档-代码一致性。
+检查 PR/代码变更的文档一致性。
+
+```bash
+docuguard pr [flags]
+
+参数:
+  --base string       基准分支 (默认 "main")
+  --docs strings      文档匹配模式 (默认 [README.md,docs/**/*.md])
+  --dry-run           仅显示检测到的变更，跳过 LLM 检查
+  --skip-llm          跳过 LLM，仅使用关键词匹配
+  --two-stage         使用两阶段匹配（宽松匹配 + LLM 过滤）
+  --format string     输出格式: text, json (默认 "text")
+
+GitHub 模式:
+  --github            启用 GitHub 模式
+  --pr int            PR 编号 (GitHub 模式必需)
+  --token string      GitHub Token (或使用 GITHUB_TOKEN 环境变量)
+  --repo string       仓库 owner/repo (自动检测)
+  --comment           在 PR 上发表评论
+```
+
+### `docuguard check`
+
+使用绑定注解检查文档。
 
 ```bash
 docuguard check [files...]
@@ -143,32 +150,7 @@ docuguard check --all
 docuguard check --format json docs/api.md
 ```
 
-### docuguard pr
-
-检查 PR 变更的文档一致性。
-
-```bash
-# 本地模式
-docuguard pr [flags]
-
-参数:
-  --base string     基准分支 (默认 "main")
-  --docs strings    文档匹配模式 (默认 [README.md,docs/**/*.md])
-  --dry-run         仅显示检测到的变更
-  --skip-llm        跳过 LLM 检查，仅使用关键词匹配
-  --format string   输出格式: text, json (默认 "text")
-
-# GitHub 模式
-docuguard pr --github [flags]
-
-参数:
-  --pr int          PR 编号 (必需)
-  --token string    GitHub Token (或使用 GITHUB_TOKEN 环境变量)
-  --repo string     仓库 owner/repo (自动检测)
-  --comment         在 PR 上发表评论
-```
-
-### docuguard init
+### `docuguard init`
 
 初始化配置文件。
 
@@ -176,7 +158,19 @@ docuguard pr --github [flags]
 docuguard init
 ```
 
-## 支持的绑定类型
+## 🔧 工作原理
+
+### 两阶段匹配（推荐）
+
+```
+代码变更 → 提取符号 → [阶段1: 宽松匹配] → 候选文档 → [阶段2: LLM 过滤] → 相关文档 → [阶段3: 一致性检查]
+```
+
+1. **阶段 1 - 宽松匹配**：使用多种策略（精确名称、代码块、关键词、部分匹配）查找候选文档
+2. **阶段 2 - LLM 过滤**：批量调用 LLM 过滤出真正相关的文档
+3. **阶段 3 - 一致性检查**：验证文档是否与代码实现一致
+
+### 支持的绑定类型
 
 | 类型 | 语法 |
 |------|------|
@@ -185,20 +179,12 @@ docuguard init
 | 常量 | `const="ConstName"` |
 | 变量 | `var="VarName"` |
 
-## 输出格式
-
-- `text` - 可读文本格式（默认）
-- `json` - JSON 格式
-- `github-actions` - GitHub Actions 注解格式
-
-## CI/CD 集成
+## 🔄 CI/CD 集成
 
 ### GitHub Actions (PR Bot 模式)
 
-添加到你的工作流 (`.github/workflows/docuguard.yml`)：
-
 ```yaml
-name: Documentation Check
+name: DocuGuard
 
 on:
   pull_request:
@@ -216,15 +202,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.21"
 
       - name: Install DocuGuard
         run: go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
-      - name: Run DocuGuard
+      - name: Check Documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -232,13 +217,14 @@ jobs:
           docuguard pr \
             --github \
             --pr ${{ github.event.pull_request.number }} \
+            --two-stage \
             --comment
 ```
 
 ### GitHub Actions (注解模式)
 
 ```yaml
-name: Documentation Check
+name: DocuGuard Check
 
 on:
   push:
@@ -252,8 +238,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.21"
 
@@ -261,24 +246,33 @@ jobs:
         run: go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 
       - name: Check Documentation
-        run: docuguard check --all --format github-actions
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: docuguard check --all --format github-actions
 ```
 
-## PR Bot 工作原理
+## 🤝 参与贡献
 
-1. 从 git diff 检测代码变更
-2. 提取变更的 Go 符号（函数、结构体等）
-3. 扫描文档文件（README.md、docs/*.md）
-4. 使用关键词匹配查找相关文档
-5. 可选使用 LLM 验证一致性
-6. 输出报告或发表 PR 评论
+欢迎贡献代码！请在提交 Pull Request 之前阅读我们的 [贡献指南](CONTRIBUTING.md)。
 
-## 参与贡献
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 提交 Pull Request
 
-请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+## 📄 开源协议
 
-## 开源协议
+本项目采用 MIT 协议 - 详见 [LICENSE](LICENSE) 文件。
 
-[MIT](LICENSE)
+## 🙏 致谢
+
+- [spf13/cobra](https://github.com/spf13/cobra) - CLI 框架
+- [spf13/viper](https://github.com/spf13/viper) - 配置管理
+- OpenAI - LLM API
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/blueberrycongee">blueberrycongee</a>
+</p>
