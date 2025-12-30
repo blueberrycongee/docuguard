@@ -1,0 +1,40 @@
+# Example workflow for using DocuGuard in your repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Documentation Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  docuguard:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install DocuGuard
+        run: go install github.com/yourname/docuguard/cmd/docuguard@latest
+
+      - name: Run DocuGuard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          docuguard pr \
+            --github \
+            --pr ${{ github.event.pull_request.number }} \
+            --comment \
+            --docs "README.md,docs/**/*.md"

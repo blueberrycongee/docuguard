@@ -1,0 +1,87 @@
+name: 'DocuGuard PR Check'
+description: 'Check documentation-code consistency in PRs'
+author: 'yourname'
+
+branding:
+  icon: 'file-text'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub Token for API access'
+    required: true
+  openai-api-key:
+    description: 'OpenAI API Key for LLM analysis (optional)'
+    required: false
+  docs:
+    description: 'Documentation patterns to scan (comma-separated)'
+    required: false
+    default: 'README.md,docs/**/*.md'
+  fail-on-inconsistent:
+    description: 'Fail the action if inconsistency found'
+    required: false
+    default: 'false'
+  skip-llm:
+    description: 'Skip LLM check, use keyword matching only'
+    required: false
+    default: 'false'
+  post-comment:
+    description: 'Post comment on PR with results'
+    required: false
+    default: 'true'
+
+outputs:
+  inconsistent-count:
+    description: 'Number of inconsistencies found'
+    value: ${{ steps.check.outputs.inconsistent }}
+  total-symbols:
+    description: 'Total number of changed symbols'
+    value: ${{ steps.check.outputs.symbols }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+
+    - name: Install DocuGuard
+      shell: bash
+      run: go install github.com/yourname/docuguard/cmd/docuguard@latest
+
+    - name: Run Check
+      id: check
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        OPENAI_API_KEY: ${{ inputs.openai-api-key }}
+      run: |
+        ARGS="--github --pr ${{ github.event.pull_request.number }}"
+        
+        if [ "${{ inputs.post-comment }}" = "true" ]; then
+          ARGS="$ARGS --comment"
+        fi
+        
+        if [ "${{ inputs.skip-llm }}" = "true" ]; then
+          ARGS="$ARGS --skip-llm"
+        fi
+        
+        ARGS="$ARGS --docs \"${{ inputs.docs }}\""
+        
+        echo "Running: docuguard pr $ARGS"
+        
+        OUTPUT=$(docuguard pr $ARGS --format json 2>&1) || true
+        echo "$OUTPUT"
+        
+        # Extract counts from JSON output
+        INCONSISTENT=$(echo "$OUTPUT" | jq -r '.inconsistent // 0' 2>/dev/null || echo "0")
+        SYMBOLS=$(echo "$OUTPUT" | jq -r '.total_symbols // 0' 2>/dev/null || echo "0")
+        
+        echo "inconsistent=$INCONSISTENT" >> $GITHUB_OUTPUT
+        echo "symbols=$SYMBOLS" >> $GITHUB_OUTPUT
+        
+        if [ "${{ inputs.fail-on-inconsistent }}" = "true" ] && [ "$INCONSISTENT" -gt 0 ]; then
+          echo "::error::Found $INCONSISTENT documentation inconsistencies"
+          exit 1
+        fi

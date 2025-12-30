@@ -1,0 +1,116 @@
+package github
+
+import (
+	"fmt"
+	"io"
+)
+
+// PRInfo PR 信息
+type PRInfo struct {
+	Number    int    `json:"number"`
+	Title     string `json:"title"`
+	State     string `json:"state"`
+	BaseBranch string `json:"base_branch"`
+	HeadBranch string `json:"head_branch"`
+	HTMLURL   string `json:"html_url"`
+	DiffURL   string `json:"diff_url"`
+}
+
+// PRFile PR 中变更的文件
+type PRFile struct {
+	Filename  string `json:"filename"`
+	Status    string `json:"status"` // added, removed, modified, renamed
+	Additions int    `json:"additions"`
+	Deletions int    `json:"deletions"`
+	Patch     string `json:"patch"`
+}
+
+// GetPRInfo 获取 PR 信息
+func (c *Client) GetPRInfo(prNumber int) (*PRInfo, error) {
+	path := fmt.Sprintf("/repos/%s/%s/pulls/%d", c.owner, c.repo, prNumber)
+
+	resp, err := c.doRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var pr struct {
+		Number  int    `json:"number"`
+		Title   string `json:"title"`
+		State   string `json:"state"`
+		HTMLURL string `json:"html_url"`
+		DiffURL string `json:"diff_url"`
+		Base    struct {
+			Ref string `json:"ref"`
+		} `json:"base"`
+		Head struct {
+			Ref string `json:"ref"`
+		} `json:"head"`
+	}
+
+	if err := decodeResponse(resp, &pr); err != nil {
+		return nil, err
+	}
+
+	return &PRInfo{
+		Number:     pr.Number,
+		Title:      pr.Title,
+		State:      pr.State,
+		BaseBranch: pr.Base.Ref,
+		HeadBranch: pr.Head.Ref,
+		HTMLURL:    pr.HTMLURL,
+		DiffURL:    pr.DiffURL,
+	}, nil
+}
+
+// GetPRFiles 获取 PR 中变更的文件列表
+func (c *Client) GetPRFiles(prNumber int) ([]PRFile, error) {
+	path := fmt.Sprintf("/repos/%s/%s/pulls/%d/files", c.owner, c.repo, prNumber)
+
+	resp, err := c.doRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []PRFile
+	if err := decodeResponse(resp, &files); err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
+// GetPRDiff 获取 PR 的 diff 内容
+func (c *Client) GetPRDiff(prNumber int) (string, error) {
+	path := fmt.Sprintf("/repos/%s/%s/pulls/%d", c.owner, c.repo, prNumber)
+
+	resp, err := c.doRequest("GET", path+".diff", nil)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("API error %d: %s", resp.StatusCode, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
+
+// BuildDiffFromFiles 从文件列表构建 diff
+func BuildDiffFromFiles(files []PRFile) string {
+	var diff string
+	for _, f := range files {
+		if f.Patch != "" {
+			diff += fmt.Sprintf("diff --git a/%s b/%s\n", f.Filename, f.Filename)
+			diff += f.Patch + "\n"
+		}
+	}
+	return diff
+}
