@@ -12,19 +12,19 @@
   <a href="README.md">English</a> | <b>中文</b>
 </p>
 
-> 轻量级文档-代码一致性检查工具，基于 LLM 语义分析自动检测文档与代码实现之间的冲突。
+轻量级文档-代码一致性检查工具，基于 LLM 语义分析自动检测文档与代码实现之间的冲突。
 
-## ✨ 特性
+## 特性
 
-- 🔍 **智能检测** - 自动检测文档描述与代码实现的不一致
-- 🤖 **PR Bot 模式** - 自动检查 PR 中可能需要更新的文档
-- 🎯 **两阶段匹配** - 宽松关键词匹配 + LLM 相关性过滤，提高准确率
-- 📝 **注解支持** - 支持 Markdown 文件中的绑定注解
-- 📊 **多种格式** - 支持文本、JSON、GitHub Actions 输出格式
-- ⚙️ **灵活配置** - YAML 配置文件
-- 🔄 **CI/CD 就绪** - 轻松集成 GitHub Actions
+- **智能检测** - 自动检测文档描述与代码实现的不一致
+- **PR Bot 模式** - 自动检查 PR 中可能需要更新的文档
+- **两阶段匹配** - 宽松关键词匹配 + LLM 相关性过滤，提高准确率
+- **注解支持** - 支持 Markdown 文件中的绑定注解
+- **多种格式** - 支持文本、JSON、GitHub Actions 输出格式
+- **灵活配置** - YAML 配置文件
+- **CI/CD 就绪** - 轻松集成 GitHub Actions
 
-## 📦 安装
+## 安装
 
 ### 从源码安装
 
@@ -41,7 +41,7 @@ go install github.com/blueberrycongee/docuguard/cmd/docuguard@latest
 - Go 1.21+
 - OpenAI API Key（或兼容的 API）
 
-## 🚀 快速开始
+## 快速开始
 
 ### PR Bot 模式（推荐）
 
@@ -78,7 +78,7 @@ docuguard pr --dry-run
 docuguard check docs/api.md
 ```
 
-## ⚙️ 配置说明
+## 配置说明
 
 在项目根目录创建 `.docuguard.yaml`：
 
@@ -115,7 +115,7 @@ export OPENAI_API_KEY=your-api-key
 export OPENAI_API_BASE=https://your-api-endpoint
 ```
 
-## 📖 命令说明
+## 命令说明
 
 ### `docuguard pr`
 
@@ -158,7 +158,7 @@ docuguard check --format json docs/api.md
 docuguard init
 ```
 
-## 🔧 工作原理
+## 工作原理
 
 ### 两阶段匹配（推荐）
 
@@ -179,7 +179,7 @@ docuguard init
 | 常量 | `const="ConstName"` |
 | 变量 | `var="VarName"` |
 
-## 🔄 CI/CD 集成
+## CI/CD 集成
 
 ### GitHub Actions (PR Bot 模式)
 
@@ -251,7 +251,7 @@ jobs:
         run: docuguard check --all --format github-actions
 ```
 
-## 🤝 参与贡献
+## 参与贡献
 
 欢迎贡献代码！请在提交 Pull Request 之前阅读我们的 [贡献指南](CONTRIBUTING.md)。
 
@@ -261,18 +261,12 @@ jobs:
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 提交 Pull Request
 
-## 📄 开源协议
+## 开源协议
 
 本项目采用 MIT 协议 - 详见 [LICENSE](LICENSE) 文件。
 
-## 🙏 致谢
+## 致谢
 
 - [spf13/cobra](https://github.com/spf13/cobra) - CLI 框架
 - [spf13/viper](https://github.com/spf13/viper) - 配置管理
 - OpenAI - LLM API
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/blueberrycongee">blueberrycongee</a>
-</p>

@@ -12,19 +12,19 @@
   <b>English</b> | <a href="README_CN.md">中文</a>
 </p>
 
-> A lightweight CLI tool for checking documentation-code consistency using LLM semantic analysis.
+A lightweight CLI tool for checking documentation-code consistency using LLM semantic analysis.
 
-## ✨ Features
+## Features
 
-- 🔍 **Smart Detection** - Detects inconsistencies between documentation and code implementation
-- 🤖 **PR Bot Mode** - Automatically checks PRs for documentation that may need updates
-- 🎯 **Two-Stage Matching** - Broad keyword matching + LLM relevance filtering for accurate results
-- 📝 **Annotation Support** - Supports binding annotations in Markdown files
-- 📊 **Multiple Formats** - Output in text, JSON, or GitHub Actions format
-- ⚙️ **Configurable** - Flexible YAML configuration
-- 🔄 **CI/CD Ready** - Easy integration with GitHub Actions
+- **Smart Detection** - Detects inconsistencies between documentation and code implementation
+- **PR Bot Mode** - Automatically checks PRs for documentation that may need updates
+- **Two-Stage Matching** - Broad keyword matching + LLM relevance filtering for accurate results
+- **Annotation Support** - Supports binding annotations in Markdown files
+- **Multiple Formats** - Output in text, JSON, or GitHub Actions format
+- **Configurable** - Flexible YAML configuration
+- **CI/CD Ready** - Easy integration with GitHub Actions
 
-## 📦 Installation
+## Installation
 
 ### From Source
 
@@ -41,7 +41,7 @@ Download from [Releases](https://github.com/blueberrycongee/docuguard/releases).
 - Go 1.21+
 - OpenAI API key (or compatible API)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### PR Bot Mode (Recommended)
 
@@ -78,7 +78,7 @@ Orders over $100 qualify for free shipping.
 docuguard check docs/api.md
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 Create `.docuguard.yaml` in your project root:
 
@@ -115,7 +115,7 @@ export OPENAI_API_KEY=your-api-key
 export OPENAI_API_BASE=https://your-api-endpoint
 ```
 
-## 📖 Commands
+## Commands
 
 ### `docuguard pr`
 
@@ -158,7 +158,7 @@ Initialize configuration file.
 docuguard init
 ```
 
-## 🔧 How It Works
+## How It Works
 
 ### Two-Stage Matching (Recommended)
 
@@ -179,7 +179,7 @@ Code Changes → Extract Symbols → [Stage 1: Broad Match] → Candidates → [
 | Const | `const="ConstName"` |
 | Var | `var="VarName"` |
 
-## 🔄 CI/CD Integration
+## CI/CD Integration
 
 ### GitHub Actions (PR Bot)
 
@@ -251,7 +251,7 @@ jobs:
         run: docuguard check --all --format github-actions
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a Pull Request.
 
@@ -261,18 +261,12 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [spf13/cobra](https://github.com/spf13/cobra) - CLI framework
 - [spf13/viper](https://github.com/spf13/viper) - Configuration management
 - OpenAI - LLM API
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/blueberrycongee">blueberrycongee</a>
-</p>
