@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/blueberrycongee/docuguard/internal/config"
 	"github.com/blueberrycongee/docuguard/internal/engine"
@@ -47,7 +49,14 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	var files []string
 	if checkAll {
-		files = cfg.Scan.Include
+		// Expand glob patterns to actual file paths
+		files, err = expandGlobPatterns(".", cfg.Scan.Include)
+		if err != nil {
+			return fmt.Errorf("failed to expand patterns: %w", err)
+		}
+		if len(files) == 0 {
+			return fmt.Errorf("no files found matching patterns: %v", cfg.Scan.Include)
+		}
 	} else if len(args) > 0 {
 		files = args
 	} else {
@@ -83,4 +92,45 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+
+// expandGlobPatterns expands glob patterns to actual file paths.
+func expandGlobPatterns(rootDir string, patterns []string) ([]string, error) {
+	seen := make(map[string]bool)
+	var files []string
+
+	for _, pattern := range patterns {
+		fullPattern := filepath.Join(rootDir, pattern)
+		matches, err := filepath.Glob(fullPattern)
+		if err != nil {
+			continue
+		}
+
+		for _, match := range matches {
+			info, err := os.Stat(match)
+			if err != nil || info.IsDir() {
+				continue
+			}
+			if strings.HasSuffix(strings.ToLower(match), ".md") {
+				if !seen[match] {
+					seen[match] = true
+					files = append(files, match)
+				}
+			}
+		}
+
+		// Handle non-glob patterns (direct file paths)
+		if !strings.Contains(pattern, "*") {
+			filePath := filepath.Join(rootDir, pattern)
+			if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+				if !seen[filePath] {
+					seen[filePath] = true
+					files = append(files, filePath)
+				}
+			}
+		}
+	}
+
+	return files, nil
 }
