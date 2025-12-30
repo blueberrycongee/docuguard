@@ -1,0 +1,35 @@
+# DocuGuard Configuration
+# See: https://github.com/yourname/docuguard
+
+version: "1.0"
+
+llm:
+  # Provider: openai, anthropic, ollama
+  provider: "openai"
+  # Model name
+  model: "gpt-4"
+  # Custom API endpoint (optional)
+  base_url: ""
+  # Request timeout
+  timeout: "60s"
+
+scan:
+  # Files to include (glob patterns)
+  include:
+    - "docs/**/*.md"
+    - "README.md"
+  # Files to exclude
+  exclude:
+    - "docs/archive/**"
+
+rules:
+  # Exit with error if inconsistency found
+  fail_on_inconsistent: true
+  # Minimum confidence threshold
+  confidence_threshold: 0.8
+
+output:
+  # Format: text, json, github-actions
+  format: "text"
+  # Enable colored output
+  color: true
