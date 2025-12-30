@@ -75,11 +75,7 @@ func (e *PREngine) CheckFromDiff(ctx context.Context, diffContent string, opts P
 
 	if opts.UseTwoStage && !opts.SkipLLM {
 		// Two-stage matching: broad match + LLM relevance filter
-		relevantPairs, err = e.twoStageMatch(ctx, symbols, segments)
-		if err != nil {
-			// Fallback to quick match on error
-			relevantPairs = matcher.QuickMatch(symbols, segments)
-		}
+		relevantPairs = e.twoStageMatch(ctx, symbols, segments)
 	} else {
 		// Original quick match
 		relevantPairs = matcher.QuickMatch(symbols, segments)
@@ -101,11 +97,11 @@ func (e *PREngine) CheckFromDiff(ctx context.Context, diffContent string, opts P
 // twoStageMatch performs two-stage matching:
 // Stage 1: Broad keyword matching to find candidates
 // Stage 2: LLM batch relevance check to filter candidates
-func (e *PREngine) twoStageMatch(ctx context.Context, symbols []types.ChangedSymbol, segments []types.DocSegment) ([]types.RelevanceResult, error) {
+func (e *PREngine) twoStageMatch(ctx context.Context, symbols []types.ChangedSymbol, segments []types.DocSegment) []types.RelevanceResult {
 	// Stage 1: Broad match to get candidates
 	candidates := matcher.BroadMatch(symbols, segments)
 	if len(candidates) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	// Group candidates by symbol for batch processing
@@ -147,7 +143,7 @@ func (e *PREngine) twoStageMatch(ctx context.Context, symbols []types.ChangedSym
 		}
 	}
 
-	return results, nil
+	return results
 }
 
 // checkConsistency checks consistency between a document segment and code symbol.

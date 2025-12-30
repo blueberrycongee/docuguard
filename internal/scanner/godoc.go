@@ -87,10 +87,7 @@ func ScanGoDocDir(dir string) ([]types.DocSegment, error) {
 				continue
 			}
 
-			fileSegments, err := extractDocSegments(fset, filePath, file)
-			if err != nil {
-				continue
-			}
+			fileSegments := extractDocSegments(fset, filePath, file)
 			segments = append(segments, fileSegments...)
 		}
 	}
@@ -98,7 +95,7 @@ func ScanGoDocDir(dir string) ([]types.DocSegment, error) {
 	return segments, nil
 }
 
-func extractDocSegments(fset *token.FileSet, filePath string, file *ast.File) ([]types.DocSegment, error) {
+func extractDocSegments(fset *token.FileSet, filePath string, file *ast.File) []types.DocSegment {
 	var segments []types.DocSegment
 
 	if file.Doc != nil {
@@ -151,5 +148,5 @@ func extractDocSegments(fset *token.FileSet, filePath string, file *ast.File) ([
 		}
 	}
 
-	return segments, nil
+	return segments
 }

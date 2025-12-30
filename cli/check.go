@@ -71,7 +71,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		rep.Report(os.Stdout, report)
+		_ = rep.Report(os.Stdout, report)
 
 		if report.Inconsistent > 0 {
 			hasInconsistent = true
