@@ -31,6 +31,7 @@ Thumbs.db
 /docuguard
 
 # Config with secrets
+.docuguard.yaml
 .docuguard.local.yaml
 .env
 .env.local
