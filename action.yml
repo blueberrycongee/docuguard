@@ -1,5 +1,5 @@
 name: 'DocuGuard PR Check'
-description: 'Check documentation-code consistency in PRs'
+description: 'Check documentation-code consistency in pull requests'
 author: 'yourname'
 
 branding:
@@ -74,7 +74,6 @@ runs:
         OUTPUT=$(docuguard pr $ARGS --format json 2>&1) || true
         echo "$OUTPUT"
         
-        # Extract counts from JSON output
         INCONSISTENT=$(echo "$OUTPUT" | jq -r '.inconsistent // 0' 2>/dev/null || echo "0")
         SYMBOLS=$(echo "$OUTPUT" | jq -r '.total_symbols // 0' 2>/dev/null || echo "0")
         

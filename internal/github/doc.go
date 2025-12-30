@@ -1,3 +1,5 @@
-// Package github 提供 GitHub API 集成功能
-// 支持获取 PR 信息、发表评论等操作
+// Package github provides GitHub API integration for DocuGuard.
+//
+// This package handles GitHub API operations including fetching PR information,
+// retrieving diffs, and posting comments.
 package github

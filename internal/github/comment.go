@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// CreateComment 在 PR 上创建评论
+// CreateComment creates a comment on a pull request.
 func (c *Client) CreateComment(prNumber int, body string) error {
 	path := fmt.Sprintf("/repos/%s/%s/issues/%d/comments", c.owner, c.repo, prNumber)
 
@@ -31,7 +31,7 @@ func (c *Client) CreateComment(prNumber int, body string) error {
 	return nil
 }
 
-// CreateReviewComment 在 PR 的具体代码行上创建评论
+// CreateReviewComment creates a review comment on a specific line.
 func (c *Client) CreateReviewComment(prNumber int, file string, line int, body string) error {
 	path := fmt.Sprintf("/repos/%s/%s/pulls/%d/comments", c.owner, c.repo, prNumber)
 
@@ -61,7 +61,7 @@ func (c *Client) CreateReviewComment(prNumber int, file string, line int, body s
 	return nil
 }
 
-// UpdateComment 更新评论
+// UpdateComment updates an existing comment.
 func (c *Client) UpdateComment(commentID int64, body string) error {
 	path := fmt.Sprintf("/repos/%s/%s/issues/comments/%d", c.owner, c.repo, commentID)
 
@@ -86,7 +86,7 @@ func (c *Client) UpdateComment(commentID int64, body string) error {
 	return nil
 }
 
-// FindExistingComment 查找已存在的 DocuGuard 评论
+// FindExistingComment finds an existing DocuGuard comment on a PR.
 func (c *Client) FindExistingComment(prNumber int) (int64, error) {
 	path := fmt.Sprintf("/repos/%s/%s/issues/%d/comments", c.owner, c.repo, prNumber)
 
@@ -104,7 +104,6 @@ func (c *Client) FindExistingComment(prNumber int) (int64, error) {
 		return 0, err
 	}
 
-	// 查找包含 DocuGuard 标记的评论
 	for _, comment := range comments {
 		if bytes.Contains([]byte(comment.Body), []byte("DocuGuard")) {
 			return comment.ID, nil

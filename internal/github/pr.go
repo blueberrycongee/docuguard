@@ -5,18 +5,18 @@ import (
 	"io"
 )
 
-// PRInfo PR 信息
+// PRInfo contains information about a pull request.
 type PRInfo struct {
-	Number    int    `json:"number"`
-	Title     string `json:"title"`
-	State     string `json:"state"`
+	Number     int    `json:"number"`
+	Title      string `json:"title"`
+	State      string `json:"state"`
 	BaseBranch string `json:"base_branch"`
 	HeadBranch string `json:"head_branch"`
-	HTMLURL   string `json:"html_url"`
-	DiffURL   string `json:"diff_url"`
+	HTMLURL    string `json:"html_url"`
+	DiffURL    string `json:"diff_url"`
 }
 
-// PRFile PR 中变更的文件
+// PRFile represents a file changed in a pull request.
 type PRFile struct {
 	Filename  string `json:"filename"`
 	Status    string `json:"status"` // added, removed, modified, renamed
@@ -25,7 +25,7 @@ type PRFile struct {
 	Patch     string `json:"patch"`
 }
 
-// GetPRInfo 获取 PR 信息
+// GetPRInfo retrieves information about a pull request.
 func (c *Client) GetPRInfo(prNumber int) (*PRInfo, error) {
 	path := fmt.Sprintf("/repos/%s/%s/pulls/%d", c.owner, c.repo, prNumber)
 
@@ -63,7 +63,7 @@ func (c *Client) GetPRInfo(prNumber int) (*PRInfo, error) {
 	}, nil
 }
 
-// GetPRFiles 获取 PR 中变更的文件列表
+// GetPRFiles retrieves the list of files changed in a pull request.
 func (c *Client) GetPRFiles(prNumber int) ([]PRFile, error) {
 	path := fmt.Sprintf("/repos/%s/%s/pulls/%d/files", c.owner, c.repo, prNumber)
 
@@ -80,7 +80,7 @@ func (c *Client) GetPRFiles(prNumber int) ([]PRFile, error) {
 	return files, nil
 }
 
-// GetPRDiff 获取 PR 的 diff 内容
+// GetPRDiff retrieves the diff content of a pull request.
 func (c *Client) GetPRDiff(prNumber int) (string, error) {
 	path := fmt.Sprintf("/repos/%s/%s/pulls/%d", c.owner, c.repo, prNumber)
 
@@ -103,7 +103,7 @@ func (c *Client) GetPRDiff(prNumber int) (string, error) {
 	return string(body), nil
 }
 
-// BuildDiffFromFiles 从文件列表构建 diff
+// BuildDiffFromFiles constructs a diff string from PR files.
 func BuildDiffFromFiles(files []PRFile) string {
 	var diff string
 	for _, f := range files {

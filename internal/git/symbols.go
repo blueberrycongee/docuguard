@@ -8,39 +8,35 @@ import (
 	"go/token"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/yourname/docuguard/pkg/types"
 )
 
-// SymbolExtractor 从 diff 中提取变更符号
+// SymbolExtractor extracts changed symbols from git diffs.
 type SymbolExtractor struct {
 	fset *token.FileSet
 }
 
-// NewSymbolExtractor 创建符号提取器
+// NewSymbolExtractor creates a new SymbolExtractor.
 func NewSymbolExtractor() *SymbolExtractor {
 	return &SymbolExtractor{
 		fset: token.NewFileSet(),
 	}
 }
 
-// ExtractChangedSymbols 从 diff 内容中提取变更的符号
+// ExtractChangedSymbols extracts changed Go symbols from diff content.
 func (e *SymbolExtractor) ExtractChangedSymbols(diffContent string) ([]types.ChangedSymbol, error) {
-	// 解析 diff
 	fileDiffs, err := ParseDiff(diffContent)
 	if err != nil {
 		return nil, err
 	}
 
-	// 只处理 Go 文件
 	goFiles := FilterGoFiles(fileDiffs)
 
 	var symbols []types.ChangedSymbol
 	for _, fd := range goFiles {
 		fileSymbols, err := e.extractSymbolsFromFile(fd)
 		if err != nil {
-			// 记录错误但继续处理其他文件
 			continue
 		}
 		symbols = append(symbols, fileSymbols...)
@@ -49,13 +45,10 @@ func (e *SymbolExtractor) ExtractChangedSymbols(diffContent string) ([]types.Cha
 	return symbols, nil
 }
 
-// extractSymbolsFromFile 从单个文件的 diff 中提取变更符号
+// extractSymbolsFromFile extracts changed symbols from a single file diff.
 func (e *SymbolExtractor) extractSymbolsFromFile(fd types.FileDiff) ([]types.ChangedSymbol, error) {
-	var symbols []types.ChangedSymbol
-
 	switch fd.ChangeType {
 	case types.ChangeDeleted:
-		// 文件被删除，尝试从 git 获取旧版本
 		oldContent, err := e.getOldFileContent(fd.OldPath)
 		if err != nil {
 			return nil, err
@@ -63,7 +56,6 @@ func (e *SymbolExtractor) extractSymbolsFromFile(fd types.FileDiff) ([]types.Cha
 		return e.extractAllSymbols(fd.OldPath, oldContent, types.ChangeDeleted)
 
 	case types.ChangeAdded:
-		// 新文件，解析当前内容
 		content, err := os.ReadFile(fd.NewPath)
 		if err != nil {
 			return nil, err
@@ -71,29 +63,25 @@ func (e *SymbolExtractor) extractSymbolsFromFile(fd types.FileDiff) ([]types.Cha
 		return e.extractAllSymbols(fd.NewPath, string(content), types.ChangeAdded)
 
 	case types.ChangeModified:
-		// 修改的文件，找出变更的符号
 		return e.extractModifiedSymbols(fd)
 	}
 
-	return symbols, nil
+	return nil, nil
 }
 
-// extractModifiedSymbols 提取修改文件中变更的符号
+// extractModifiedSymbols extracts symbols that were modified in a file.
 func (e *SymbolExtractor) extractModifiedSymbols(fd types.FileDiff) ([]types.ChangedSymbol, error) {
-	// 读取当前文件内容
 	content, err := os.ReadFile(fd.NewPath)
 	if err != nil {
 		return nil, err
 	}
 
-	// 解析 AST
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, fd.NewPath, content, parser.ParseComments)
 	if err != nil {
 		return nil, err
 	}
 
-	// 收集所有变更行的范围
 	changedRanges := make(map[int]bool)
 	for _, lc := range fd.ChangedLines {
 		for i := lc.NewStart; i < lc.NewStart+lc.NewCount; i++ {
@@ -103,7 +91,6 @@ func (e *SymbolExtractor) extractModifiedSymbols(fd types.FileDiff) ([]types.Cha
 
 	var symbols []types.ChangedSymbol
 
-	// 遍历 AST，找出与变更行重叠的符号
 	ast.Inspect(file, func(n ast.Node) bool {
 		if n == nil {
 			return true
@@ -179,7 +166,6 @@ func (e *SymbolExtractor) extractModifiedSymbols(fd types.FileDiff) ([]types.Cha
 		}
 
 		if sym != nil {
-			// 尝试获取旧版本代码
 			oldCode, _ := e.getOldSymbolCode(fd.OldPath, sym.Name, sym.Type)
 			sym.OldCode = oldCode
 			symbols = append(symbols, *sym)
@@ -191,8 +177,7 @@ func (e *SymbolExtractor) extractModifiedSymbols(fd types.FileDiff) ([]types.Cha
 	return symbols, nil
 }
 
-
-// overlapsWithChanges 检查符号行范围是否与变更行重叠
+// overlapsWithChanges checks if a line range overlaps with changed lines.
 func (e *SymbolExtractor) overlapsWithChanges(startLine, endLine int, changedRanges map[int]bool) bool {
 	for line := startLine; line <= endLine; line++ {
 		if changedRanges[line] {
@@ -202,7 +187,7 @@ func (e *SymbolExtractor) overlapsWithChanges(startLine, endLine int, changedRan
 	return false
 }
 
-// extractAllSymbols 提取文件中的所有符号
+// extractAllSymbols extracts all symbols from file content.
 func (e *SymbolExtractor) extractAllSymbols(filePath, content string, changeType types.ChangeType) ([]types.ChangedSymbol, error) {
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, filePath, content, parser.ParseComments)
@@ -266,7 +251,7 @@ func (e *SymbolExtractor) extractAllSymbols(filePath, content string, changeType
 	return symbols, nil
 }
 
-// nodeToString 将 AST 节点转换为字符串
+// nodeToString converts an AST node to its string representation.
 func (e *SymbolExtractor) nodeToString(fset *token.FileSet, node ast.Node) string {
 	var buf bytes.Buffer
 	if err := format.Node(&buf, fset, node); err != nil {
@@ -275,7 +260,7 @@ func (e *SymbolExtractor) nodeToString(fset *token.FileSet, node ast.Node) strin
 	return buf.String()
 }
 
-// getOldFileContent 从 git 获取文件的旧版本内容
+// getOldFileContent retrieves the old version of a file from git.
 func (e *SymbolExtractor) getOldFileContent(filePath string) (string, error) {
 	cmd := exec.Command("git", "show", "HEAD:"+filePath)
 	output, err := cmd.Output()
@@ -285,7 +270,7 @@ func (e *SymbolExtractor) getOldFileContent(filePath string) (string, error) {
 	return string(output), nil
 }
 
-// getOldSymbolCode 获取符号的旧版本代码
+// getOldSymbolCode retrieves the old version of a symbol's code.
 func (e *SymbolExtractor) getOldSymbolCode(filePath, symbolName string, symbolType types.BindingType) (string, error) {
 	oldContent, err := e.getOldFileContent(filePath)
 	if err != nil {
@@ -320,7 +305,7 @@ func (e *SymbolExtractor) getOldSymbolCode(filePath, symbolName string, symbolTy
 	return result, nil
 }
 
-// ExtractChangedSymbolsFromBase 从指定基准分支提取变更符号
+// ExtractChangedSymbolsFromBase extracts changed symbols from a base branch.
 func ExtractChangedSymbolsFromBase(baseBranch string) ([]types.ChangedSymbol, error) {
 	diff, err := GetDiff(baseBranch)
 	if err != nil {
@@ -331,7 +316,7 @@ func ExtractChangedSymbolsFromBase(baseBranch string) ([]types.ChangedSymbol, er
 	return extractor.ExtractChangedSymbols(diff)
 }
 
-// GetChangedGoFiles 获取变更的 Go 文件列表
+// GetChangedGoFiles returns a list of changed Go files from a base branch.
 func GetChangedGoFiles(baseBranch string) ([]string, error) {
 	diff, err := GetDiff(baseBranch)
 	if err != nil {
@@ -352,21 +337,4 @@ func GetChangedGoFiles(baseBranch string) ([]string, error) {
 	}
 
 	return files, nil
-}
-
-// IsInGitRepo 检查当前目录是否在 git 仓库中
-func IsInGitRepo() bool {
-	cmd := exec.Command("git", "rev-parse", "--git-dir")
-	err := cmd.Run()
-	return err == nil
-}
-
-// GetCurrentBranch 获取当前分支名
-func GetCurrentBranch() (string, error) {
-	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(output)), nil
 }

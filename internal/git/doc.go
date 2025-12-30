@@ -1,3 +1,5 @@
-// Package git 提供 Git 操作相关功能
-// 包括获取 diff、解析变更符号等
+// Package git provides Git operations for DocuGuard.
+//
+// This package handles git diff parsing and symbol extraction from
+// code changes. It supports both committed and uncommitted changes.
 package git

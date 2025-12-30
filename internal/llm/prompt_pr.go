@@ -1,86 +1,83 @@
 package llm
 
-// PRConsistencyPrompt PR 模式下的一致性检查 prompt 模板
-const PRConsistencyPrompt = `你是一个代码文档一致性检查专家。
+// PRConsistencyPrompt is the prompt template for PR consistency checking.
+const PRConsistencyPrompt = `You are a code documentation consistency expert.
 
-## 代码变更信息
-- 文件: {{.CodeFile}}
-- 符号: {{.CodeSymbol}} ({{.CodeType}})
-- 变更类型: {{.ChangeType}}
+## Code Change Information
+- File: {{.CodeFile}}
+- Symbol: {{.CodeSymbol}} ({{.CodeType}})
+- Change Type: {{.ChangeType}}
 
-### 变更前代码
+### Code Before Change
 {{.OldCode}}
 
-### 变更后代码
+### Code After Change
 {{.NewCode}}
 
-## 相关文档
-- 文件: {{.DocFile}}
-- 标题: {{.DocHeading}}
-- 内容:
+## Related Documentation
+- File: {{.DocFile}}
+- Heading: {{.DocHeading}}
+- Content:
 {{.DocContent}}
 
-## 任务
-请分析代码变更后，文档描述是否仍然准确。
+## Task
+Analyze whether the documentation is still accurate after the code change.
 
-重点检查：
-1. 数值是否一致（如阈值、限制、默认值等）
-2. 行为描述是否准确
-3. 参数说明是否正确
-4. 返回值描述是否正确
+Focus on:
+1. Numeric values (thresholds, limits, defaults)
+2. Behavior descriptions
+3. Parameter documentation
+4. Return value documentation
 
-## 输出格式
-请输出 JSON:
+## Output Format
+Output JSON:
 {
   "consistent": true/false,
   "confidence": 0.0-1.0,
-  "reason": "简要说明判断理由",
-  "suggestion": "如果不一致，建议如何修改文档"
+  "reason": "Brief explanation",
+  "suggestion": "If inconsistent, how to fix the documentation"
 }`
 
-// PRRelevancePrompt PR 模式下的相关性判断 prompt 模板
-const PRRelevancePrompt = `你是一个代码文档相关性判断专家。
+// PRRelevancePrompt is the prompt template for relevance determination.
+const PRRelevancePrompt = `You are a code documentation relevance expert.
 
-## 代码变更
-- 文件: {{.CodeFile}}
-- 符号: {{.CodeSymbol}} ({{.CodeType}})
-- 变更类型: {{.ChangeType}}
-- 代码:
+## Code Change
+- File: {{.CodeFile}}
+- Symbol: {{.CodeSymbol}} ({{.CodeType}})
+- Change Type: {{.ChangeType}}
+- Code:
 {{.NewCode}}
 
-## 文档段落
-- 文件: {{.DocFile}}
-- 标题: {{.DocHeading}}
-- 内容:
+## Documentation Segment
+- File: {{.DocFile}}
+- Heading: {{.DocHeading}}
+- Content:
 {{.DocContent}}
 
-## 任务
-请判断这段文档是否描述了这个代码的功能或行为。
+## Task
+Determine if this documentation describes the functionality of this code.
 
-判断标准：
-1. 文档是否提到了这个函数/结构体/变量
-2. 文档是否描述了相关的业务逻辑
-3. 文档中的示例是否涉及这段代码
+Criteria:
+1. Does the documentation mention this function/struct/variable?
+2. Does the documentation describe related business logic?
+3. Do examples in the documentation involve this code?
 
-## 输出格式
-请输出 JSON:
+## Output Format
+Output JSON:
 {
   "relevant": true/false,
   "confidence": 0.0-1.0,
-  "reason": "简要说明判断理由"
+  "reason": "Brief explanation"
 }`
 
-// PRPromptData PR prompt 数据
+// PRPromptData contains data for PR prompt templates.
 type PRPromptData struct {
-	// 代码信息
 	CodeFile   string
 	CodeSymbol string
 	CodeType   string
 	ChangeType string
 	OldCode    string
 	NewCode    string
-
-	// 文档信息
 	DocFile    string
 	DocHeading string
 	DocContent string

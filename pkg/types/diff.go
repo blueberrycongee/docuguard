@@ -1,38 +1,58 @@
+// Package types defines core data structures used throughout DocuGuard.
 package types
 
-// ChangeType 变更类型
+// ChangeType represents the type of change in a diff.
 type ChangeType string
 
 const (
-	ChangeAdded    ChangeType = "added"
+	// ChangeAdded indicates a newly added symbol.
+	ChangeAdded ChangeType = "added"
+	// ChangeModified indicates a modified symbol.
 	ChangeModified ChangeType = "modified"
-	ChangeDeleted  ChangeType = "deleted"
+	// ChangeDeleted indicates a deleted symbol.
+	ChangeDeleted ChangeType = "deleted"
 )
 
-// ChangedSymbol 表示代码中变更的符号
+// ChangedSymbol represents a code symbol that has been changed.
 type ChangedSymbol struct {
-	File       string      `json:"file"`        // 文件路径
-	Name       string      `json:"name"`        // 符号名称（函数名、结构体名等）
-	Type       BindingType `json:"type"`        // func / struct / const / var
-	OldCode    string      `json:"old_code"`    // 变更前的代码
-	NewCode    string      `json:"new_code"`    // 变更后的代码
-	ChangeType ChangeType  `json:"change_type"` // added / modified / deleted
-	StartLine  int         `json:"start_line"`  // 起始行号
-	EndLine    int         `json:"end_line"`    // 结束行号
+	// File is the path to the file containing the symbol.
+	File string `json:"file"`
+	// Name is the symbol name (function, struct, etc.).
+	Name string `json:"name"`
+	// Type is the symbol type (func, struct, const, var).
+	Type BindingType `json:"type"`
+	// OldCode is the code before the change.
+	OldCode string `json:"old_code"`
+	// NewCode is the code after the change.
+	NewCode string `json:"new_code"`
+	// ChangeType indicates whether the symbol was added, modified, or deleted.
+	ChangeType ChangeType `json:"change_type"`
+	// StartLine is the starting line number of the symbol.
+	StartLine int `json:"start_line"`
+	// EndLine is the ending line number of the symbol.
+	EndLine int `json:"end_line"`
 }
 
-// FileDiff 文件级别的 diff 信息
+// FileDiff represents diff information for a single file.
 type FileDiff struct {
-	OldPath      string       `json:"old_path"`
-	NewPath      string       `json:"new_path"`
-	ChangeType   ChangeType   `json:"change_type"`
+	// OldPath is the file path before the change.
+	OldPath string `json:"old_path"`
+	// NewPath is the file path after the change.
+	NewPath string `json:"new_path"`
+	// ChangeType indicates the type of file change.
+	ChangeType ChangeType `json:"change_type"`
+	// ChangedLines contains the line change information.
 	ChangedLines []LineChange `json:"changed_lines"`
 }
 
-// LineChange 行变更信息
+// LineChange represents a hunk of changed lines in a diff.
 type LineChange struct {
+	// OldStart is the starting line in the old file.
 	OldStart int `json:"old_start"`
+	// OldCount is the number of lines in the old file.
 	OldCount int `json:"old_count"`
+	// NewStart is the starting line in the new file.
 	NewStart int `json:"new_start"`
+	// NewCount is the number of lines in the new file.
 	NewCount int `json:"new_count"`
 }

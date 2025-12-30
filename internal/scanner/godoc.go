@@ -9,7 +9,7 @@ import (
 	"github.com/yourname/docuguard/pkg/types"
 )
 
-// ScanGoDoc 扫描 Go 文件中的文档注释
+// ScanGoDoc scans a Go file and extracts documentation comments.
 func ScanGoDoc(filePath string) ([]types.DocSegment, error) {
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
@@ -19,7 +19,6 @@ func ScanGoDoc(filePath string) ([]types.DocSegment, error) {
 
 	var segments []types.DocSegment
 
-	// 包注释
 	if file.Doc != nil {
 		seg := types.DocSegment{
 			File:      filePath,
@@ -33,7 +32,6 @@ func ScanGoDoc(filePath string) ([]types.DocSegment, error) {
 		segments = append(segments, seg)
 	}
 
-	// 遍历声明
 	for _, decl := range file.Decls {
 		switch d := decl.(type) {
 		case *ast.FuncDecl:
@@ -74,7 +72,7 @@ func ScanGoDoc(filePath string) ([]types.DocSegment, error) {
 	return segments, nil
 }
 
-// ScanGoDocDir 扫描目录下所有 Go 文件的文档注释
+// ScanGoDocDir scans a directory for Go documentation comments.
 func ScanGoDocDir(dir string) ([]types.DocSegment, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, nil, parser.ParseComments)
@@ -85,7 +83,6 @@ func ScanGoDocDir(dir string) ([]types.DocSegment, error) {
 	var segments []types.DocSegment
 	for _, pkg := range pkgs {
 		for filePath, file := range pkg.Files {
-			// 跳过测试文件
 			if strings.HasSuffix(filePath, "_test.go") {
 				continue
 			}
@@ -104,7 +101,6 @@ func ScanGoDocDir(dir string) ([]types.DocSegment, error) {
 func extractDocSegments(fset *token.FileSet, filePath string, file *ast.File) ([]types.DocSegment, error) {
 	var segments []types.DocSegment
 
-	// 包注释
 	if file.Doc != nil {
 		seg := types.DocSegment{
 			File:      filePath,
@@ -118,7 +114,6 @@ func extractDocSegments(fset *token.FileSet, filePath string, file *ast.File) ([
 		segments = append(segments, seg)
 	}
 
-	// 遍历声明
 	for _, decl := range file.Decls {
 		switch d := decl.(type) {
 		case *ast.FuncDecl:

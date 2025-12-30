@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Client GitHub API 客户端
+// Client is a GitHub API client.
 type Client struct {
 	token   string
 	owner   string
@@ -19,11 +19,11 @@ type Client struct {
 	http    *http.Client
 }
 
-// NewClient 创建 GitHub 客户端
+// NewClient creates a new GitHub client.
+// If repo is empty, it attempts to detect the repository from git remote.
 func NewClient(token, repo string) (*Client, error) {
 	owner, repoName, err := parseRepo(repo)
 	if err != nil {
-		// 尝试从 git remote 获取
 		owner, repoName, err = getRepoFromRemote()
 		if err != nil {
 			return nil, fmt.Errorf("failed to determine repository: %w", err)
@@ -41,7 +41,7 @@ func NewClient(token, repo string) (*Client, error) {
 	}, nil
 }
 
-// parseRepo 解析 owner/repo 格式
+// parseRepo parses an owner/repo string.
 func parseRepo(repo string) (string, string, error) {
 	if repo == "" {
 		return "", "", fmt.Errorf("empty repo")
@@ -55,7 +55,7 @@ func parseRepo(repo string) (string, string, error) {
 	return parts[0], parts[1], nil
 }
 
-// getRepoFromRemote 从 git remote 获取仓库信息
+// getRepoFromRemote extracts repository information from git remote.
 func getRepoFromRemote() (string, string, error) {
 	cmd := exec.Command("git", "remote", "get-url", "origin")
 	output, err := cmd.Output()
@@ -65,7 +65,7 @@ func getRepoFromRemote() (string, string, error) {
 
 	url := strings.TrimSpace(string(output))
 
-	// 处理 SSH 格式: git@github.com:owner/repo.git
+	// Handle SSH format: git@github.com:owner/repo.git
 	if strings.HasPrefix(url, "git@github.com:") {
 		url = strings.TrimPrefix(url, "git@github.com:")
 		url = strings.TrimSuffix(url, ".git")
@@ -75,7 +75,7 @@ func getRepoFromRemote() (string, string, error) {
 		}
 	}
 
-	// 处理 HTTPS 格式: https://github.com/owner/repo.git
+	// Handle HTTPS format: https://github.com/owner/repo.git
 	if strings.Contains(url, "github.com/") {
 		idx := strings.Index(url, "github.com/")
 		url = url[idx+len("github.com/"):]
@@ -89,7 +89,7 @@ func getRepoFromRemote() (string, string, error) {
 	return "", "", fmt.Errorf("failed to parse remote URL: %s", url)
 }
 
-// doRequest 执行 HTTP 请求
+// doRequest executes an HTTP request with authentication.
 func (c *Client) doRequest(method, path string, body io.Reader) (*http.Response, error) {
 	url := c.baseURL + path
 
@@ -109,17 +109,17 @@ func (c *Client) doRequest(method, path string, body io.Reader) (*http.Response,
 	return c.http.Do(req)
 }
 
-// GetOwner 获取仓库所有者
+// GetOwner returns the repository owner.
 func (c *Client) GetOwner() string {
 	return c.owner
 }
 
-// GetRepo 获取仓库名
+// GetRepo returns the repository name.
 func (c *Client) GetRepo() string {
 	return c.repo
 }
 
-// decodeResponse 解码 JSON 响应
+// decodeResponse decodes a JSON response.
 func decodeResponse(resp *http.Response, v interface{}) error {
 	defer resp.Body.Close()
 

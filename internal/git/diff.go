@@ -12,23 +12,23 @@ import (
 )
 
 var (
-	// 匹配 diff 文件头: diff --git a/path b/path
+	// diffHeaderRegex matches diff file headers: diff --git a/path b/path
 	diffHeaderRegex = regexp.MustCompile(`^diff --git a/(.+) b/(.+)$`)
-	// 匹配 hunk 头: @@ -old_start,old_count +new_start,new_count @@
+	// hunkHeaderRegex matches hunk headers: @@ -old_start,old_count +new_start,new_count @@
 	hunkHeaderRegex = regexp.MustCompile(`^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@`)
-	// 匹配新文件
+	// newFileRegex matches new file mode lines.
 	newFileRegex = regexp.MustCompile(`^new file mode`)
-	// 匹配删除文件
+	// deletedFileRegex matches deleted file mode lines.
 	deletedFileRegex = regexp.MustCompile(`^deleted file mode`)
 )
 
-// GetDiff 获取指定基准分支到当前 HEAD 的 diff
+// GetDiff returns the diff between the base branch and HEAD.
+// It first tries the three-dot notation (baseBranch...HEAD), then falls back
+// to two-dot notation if that fails.
 func GetDiff(baseBranch string) (string, error) {
-	// 使用 git diff 获取变更
 	cmd := exec.Command("git", "diff", baseBranch+"...HEAD")
 	output, err := cmd.Output()
 	if err != nil {
-		// 尝试不带 ... 的方式
 		cmd = exec.Command("git", "diff", baseBranch)
 		output, err = cmd.Output()
 		if err != nil {
@@ -38,16 +38,15 @@ func GetDiff(baseBranch string) (string, error) {
 	return string(output), nil
 }
 
-// GetDiffUncommitted 获取未提交的变更（工作区 + 暂存区）
+// GetDiffUncommitted returns the diff of uncommitted changes.
+// This includes both staged and unstaged changes.
 func GetDiffUncommitted() (string, error) {
-	// 获取暂存区变更
 	cmd := exec.Command("git", "diff", "--cached")
 	staged, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get staged diff: %w", err)
 	}
 
-	// 获取工作区变更
 	cmd = exec.Command("git", "diff")
 	unstaged, err := cmd.Output()
 	if err != nil {
@@ -57,7 +56,7 @@ func GetDiffUncommitted() (string, error) {
 	return string(staged) + string(unstaged), nil
 }
 
-// ParseDiff 解析 diff 内容，返回文件级别的变更信息
+// ParseDiff parses diff content and returns file-level change information.
 func ParseDiff(diffContent string) ([]types.FileDiff, error) {
 	var fileDiffs []types.FileDiff
 	var currentDiff *types.FileDiff
@@ -66,9 +65,7 @@ func ParseDiff(diffContent string) ([]types.FileDiff, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// 检查是否是新的文件 diff
 		if matches := diffHeaderRegex.FindStringSubmatch(line); matches != nil {
-			// 保存之前的 diff
 			if currentDiff != nil {
 				fileDiffs = append(fileDiffs, *currentDiff)
 			}
@@ -84,19 +81,16 @@ func ParseDiff(diffContent string) ([]types.FileDiff, error) {
 			continue
 		}
 
-		// 检查是否是新文件
 		if newFileRegex.MatchString(line) {
 			currentDiff.ChangeType = types.ChangeAdded
 			continue
 		}
 
-		// 检查是否是删除文件
 		if deletedFileRegex.MatchString(line) {
 			currentDiff.ChangeType = types.ChangeDeleted
 			continue
 		}
 
-		// 解析 hunk 头
 		if matches := hunkHeaderRegex.FindStringSubmatch(line); matches != nil {
 			lc := types.LineChange{}
 
@@ -118,7 +112,6 @@ func ParseDiff(diffContent string) ([]types.FileDiff, error) {
 		}
 	}
 
-	// 保存最后一个 diff
 	if currentDiff != nil {
 		fileDiffs = append(fileDiffs, *currentDiff)
 	}
@@ -126,16 +119,32 @@ func ParseDiff(diffContent string) ([]types.FileDiff, error) {
 	return fileDiffs, scanner.Err()
 }
 
-// FilterGoFiles 过滤出 Go 文件的变更
+// FilterGoFiles filters the diff list to include only Go source files.
+// Test files (*_test.go) are excluded.
 func FilterGoFiles(diffs []types.FileDiff) []types.FileDiff {
 	var goFiles []types.FileDiff
 	for _, d := range diffs {
 		if strings.HasSuffix(d.NewPath, ".go") || strings.HasSuffix(d.OldPath, ".go") {
-			// 排除测试文件（可选）
 			if !strings.HasSuffix(d.NewPath, "_test.go") {
 				goFiles = append(goFiles, d)
 			}
 		}
 	}
 	return goFiles
+}
+
+// IsInGitRepo checks if the current directory is inside a git repository.
+func IsInGitRepo() bool {
+	cmd := exec.Command("git", "rev-parse", "--git-dir")
+	return cmd.Run() == nil
+}
+
+// GetCurrentBranch returns the name of the current branch.
+func GetCurrentBranch() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(output)), nil
 }
