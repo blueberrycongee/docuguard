@@ -67,11 +67,15 @@ func BroadMatch(symbols []types.ChangedSymbol, segments []types.DocSegment) []ty
 
 			// Include if any match found
 			if score > 0 {
+				finalScore := score
+				if finalScore > 1.0 {
+					finalScore = 1.0
+				}
 				results = append(results, types.RelevanceResult{
 					Segment:    seg,
 					Symbol:     sym,
 					IsRelevant: true,
-					Confidence: min(score, 1.0),
+					Confidence: finalScore,
 					Reason:     strings.Join(reasons, ", "),
 				})
 			}
@@ -89,11 +93,4 @@ func GroupCandidatesBySymbol(candidates []types.RelevanceResult) map[string][]ty
 		groups[key] = append(groups[key], c)
 	}
 	return groups
-}
-
-func min(a, b float64) float64 {
-	if a < b {
-		return a
-	}
-	return b
 }

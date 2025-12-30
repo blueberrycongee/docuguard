@@ -8,9 +8,9 @@ import (
 
 // MockClient 测试用 Mock 客户端
 type MockClient struct {
-	Result           *types.CheckResult
-	RelevantIndices  []int
-	Err              error
+	Result          *types.CheckResult
+	RelevantIndices []int
+	Err             error
 }
 
 func NewMockClient(result *types.CheckResult, err error) *MockClient {

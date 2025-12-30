@@ -35,10 +35,10 @@ Guidelines:
 func buildRelevancePrompt(req RelevanceRequest) string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("## Code Symbol\n"))
-	sb.WriteString(fmt.Sprintf("Name: %s\n", req.Symbol.Name))
-	sb.WriteString(fmt.Sprintf("Type: %s\n", req.Symbol.Type))
-	sb.WriteString(fmt.Sprintf("File: %s\n\n", req.Symbol.File))
+	sb.WriteString("## Code Symbol\n")
+	sb.WriteString("Name: " + req.Symbol.Name + "\n")
+	sb.WriteString("Type: " + string(req.Symbol.Type) + "\n")
+	sb.WriteString("File: " + req.Symbol.File + "\n\n")
 	sb.WriteString("```go\n")
 	sb.WriteString(req.Symbol.NewCode)
 	sb.WriteString("\n```\n\n")

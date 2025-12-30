@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/blueberrycongee/docuguard/internal/config"
 	"github.com/blueberrycongee/docuguard/internal/engine"
 	"github.com/blueberrycongee/docuguard/internal/reporter"
+	"github.com/spf13/cobra"
 )
 
 var (

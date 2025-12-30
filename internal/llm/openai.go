@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/blueberrycongee/docuguard/pkg/types"
+	"github.com/go-resty/resty/v2"
 )
 
 // OpenAIClient OpenAI 客户端
