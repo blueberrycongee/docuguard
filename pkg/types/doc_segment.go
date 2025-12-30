@@ -55,6 +55,8 @@ type PRCheckResult struct {
 	Segment DocSegment `json:"segment"`
 	// Symbol is the code symbol checked against.
 	Symbol ChangedSymbol `json:"symbol"`
+	// Related indicates whether the documentation is about this specific code.
+	Related bool `json:"related"`
 	// Consistent indicates whether the documentation matches the code.
 	Consistent bool `json:"consistent"`
 	// Confidence is the confidence score (0-1).

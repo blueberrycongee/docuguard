@@ -2,6 +2,7 @@ package types
 
 // CheckResult 检查结果
 type CheckResult struct {
+	Related    bool     `json:"related"`
 	Consistent bool     `json:"consistent"`
 	Confidence float64  `json:"confidence"`
 	Reason     string   `json:"reason"`
