@@ -24,7 +24,7 @@ func (c *Client) CreateComment(prNumber int, body string) error {
 
 	if resp.StatusCode >= 400 {
 		var result map[string]interface{}
-		decodeResponse(resp, &result)
+		_ = decodeResponse(resp, &result)
 		return fmt.Errorf("failed to create comment: %v", result)
 	}
 
@@ -54,7 +54,7 @@ func (c *Client) CreateReviewComment(prNumber int, file string, line int, body s
 
 	if resp.StatusCode >= 400 {
 		var result map[string]interface{}
-		decodeResponse(resp, &result)
+		_ = decodeResponse(resp, &result)
 		return fmt.Errorf("failed to create review comment: %v", result)
 	}
 
@@ -79,7 +79,7 @@ func (c *Client) UpdateComment(commentID int64, body string) error {
 
 	if resp.StatusCode >= 400 {
 		var result map[string]interface{}
-		decodeResponse(resp, &result)
+		_ = decodeResponse(resp, &result)
 		return fmt.Errorf("failed to update comment: %v", result)
 	}
 
