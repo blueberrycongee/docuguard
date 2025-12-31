@@ -45,7 +45,7 @@ fmt.Printf("Payment processed: %s (Status: %s)\n", payment.TransactionID, paymen
 
 ### Free Shipping Policy
 
-Orders qualify for **free shipping** when the order total reaches **$500 or more**.
+Orders qualify for **free shipping** when the order total reaches **$1000 or more**.
 
 ### CalculateShipping
 
@@ -63,8 +63,8 @@ func CalculateShipping(orderAmount float64) float64
 - `float64`: The shipping cost (0.0 if free shipping applies)
 
 **Shipping Rates:**
-- Orders **$500+**: Free shipping
-- Orders **under $500**: $50.00 standard shipping
+- Orders **$1000+**: Free shipping
+- Orders **under $1000**: $50.00 standard shipping
 
 **Example:**
 ```go
@@ -73,7 +73,7 @@ shipping := CalculateShipping(299.99)
 fmt.Printf("Shipping cost: $%.2f\n", shipping) // Output: $50.00
 
 // Order qualifies for free shipping
-shipping = CalculateShipping(599.99)
+shipping = CalculateShipping(1200.00)
 fmt.Printf("Shipping cost: $%.2f\n", shipping) // Output: $0.00
 ```
 

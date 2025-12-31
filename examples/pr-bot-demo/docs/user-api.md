@@ -12,11 +12,12 @@ Creates a new user in the system.
 
 **Signature:**
 ```go
-func CreateUser(name string) (*User, error)
+func CreateUser(name, email string) (*User, error)
 ```
 
 **Parameters:**
 - `name` (string): The user's full name
+- `email` (string): The user's email address
 
 **Returns:**
 - `*User`: The created user object
@@ -24,14 +25,14 @@ func CreateUser(name string) (*User, error)
 
 **Example:**
 ```go
-user, err := CreateUser("John Doe")
+user, err := CreateUser("John Doe", "john@example.com")
 if err != nil {
     log.Fatal(err)
 }
-fmt.Printf("Created user: %s\n", user.Name)
+fmt.Printf("Created user: %s (%s)\n", user.Name, user.Email)
 ```
 
-**Note:** The name parameter is required and cannot be empty.
+**Note:** Both name and email parameters are required and cannot be empty.
 
 ---
 

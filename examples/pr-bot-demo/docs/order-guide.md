@@ -54,22 +54,26 @@ Retrieves an order by its ID.
 
 **Signature:**
 ```go
-func GetOrder(orderID int) *Order
+func GetOrder(orderID int) (*Order, error)
 ```
 
 **Parameters:**
 - `orderID` (int): The order's unique identifier
 
 **Returns:**
-- `*Order`: The order object
+- `*Order`: The order object if found
+- `error`: Error if order not found or invalid ID
 
 **Example:**
 ```go
-order := GetOrder(67890)
+order, err := GetOrder(67890)
+if err != nil {
+    log.Fatal(err)
+}
 fmt.Printf("Order Status: %s\n", order.Status)
 ```
 
-**Note:** This function always returns an order object. Check the order status to verify it exists.
+**Note:** Returns an error if the order is not found or the ID is invalid.
 
 ## Updating Orders
 

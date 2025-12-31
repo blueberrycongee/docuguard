@@ -251,20 +251,63 @@ func runPRGitHub() error {
 	relevantPairs := matcher.QuickMatch(symbols, segments)
 	fmt.Printf("Found %d potential matches\n\n", len(relevantPairs))
 
-	report := &types.PRReport{
-		TotalSymbols:  len(symbols),
-		TotalSegments: len(segments),
-		RelevantPairs: len(relevantPairs),
-	}
+	// Use LLM for consistency check if configured
+	var report *types.PRReport
+	if !prSkipLLM {
+		cfg, err := config.Load(cfgFile)
+		if err == nil && cfg.LLM.APIKey != "" {
+			ctx := context.Background()
+			prEngine, err := engine.NewPREngine(cfg)
+			if err != nil {
+				return fmt.Errorf("failed to create PR engine: %w", err)
+			}
 
-	for _, pair := range relevantPairs {
-		report.Results = append(report.Results, types.PRCheckResult{
-			Segment:    pair.Segment,
-			Symbol:     pair.Symbol,
-			Consistent: true,
-			Confidence: pair.Confidence,
-			Reason:     pair.Reason,
-		})
+			opts := engine.PRCheckOptions{
+				BaseBranch:  prInfo.BaseBranch,
+				DocPatterns: prDocs,
+				SkipLLM:     prSkipLLM,
+				UseTwoStage: prTwoStage,
+			}
+
+			report, err = prEngine.CheckFromDiff(ctx, diff, opts)
+			if err != nil {
+				return fmt.Errorf("failed to check: %w", err)
+			}
+		} else {
+			// Fallback to keyword matching only
+			report = &types.PRReport{
+				TotalSymbols:  len(symbols),
+				TotalSegments: len(segments),
+				RelevantPairs: len(relevantPairs),
+			}
+
+			for _, pair := range relevantPairs {
+				report.Results = append(report.Results, types.PRCheckResult{
+					Segment:    pair.Segment,
+					Symbol:     pair.Symbol,
+					Consistent: true,
+					Confidence: pair.Confidence,
+					Reason:     pair.Reason,
+				})
+			}
+		}
+	} else {
+		// Skip LLM, use keyword matching only
+		report = &types.PRReport{
+			TotalSymbols:  len(symbols),
+			TotalSegments: len(segments),
+			RelevantPairs: len(relevantPairs),
+		}
+
+		for _, pair := range relevantPairs {
+			report.Results = append(report.Results, types.PRCheckResult{
+				Segment:    pair.Segment,
+				Symbol:     pair.Symbol,
+				Consistent: true,
+				Confidence: pair.Confidence,
+				Reason:     pair.Reason,
+			})
+		}
 	}
 
 	if prComment {
