@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/blueberrycongee/docuguard/pkg/types"
 )
@@ -26,7 +27,8 @@ func NewSymbolExtractor() *SymbolExtractor {
 
 // ExtractChangedSymbols extracts changed Go symbols from diff content.
 func (e *SymbolExtractor) ExtractChangedSymbols(diffContent string) ([]types.ChangedSymbol, error) {
-	fileDiffs, err := ParseDiff(diffContent)
+	// Use the new method that parses diff content directly
+	fileDiffs, err := ParseDiffWithContent(diffContent)
 	if err != nil {
 		return nil, err
 	}
@@ -35,14 +37,114 @@ func (e *SymbolExtractor) ExtractChangedSymbols(diffContent string) ([]types.Cha
 
 	var symbols []types.ChangedSymbol
 	for _, fd := range goFiles {
-		fileSymbols, err := e.extractSymbolsFromFile(fd)
-		if err != nil {
-			continue
+		// Extract symbols from added lines (new/modified code)
+		addedSymbols := ExtractSymbolsFromDiffLines(fd.AddedLines)
+		for _, name := range addedSymbols {
+			sym := types.ChangedSymbol{
+				File:       fd.NewPath,
+				Name:       name,
+				Type:       guessSymbolType(name, fd.AddedLines),
+				ChangeType: fd.ChangeType,
+			}
+			// Try to get the full code from the current file
+			if code, start, end := e.getSymbolCode(fd.NewPath, name); code != "" {
+				sym.NewCode = code
+				sym.StartLine = start
+				sym.EndLine = end
+			}
+			symbols = append(symbols, sym)
 		}
-		symbols = append(symbols, fileSymbols...)
+
+		// For deleted files, extract from removed lines
+		if fd.ChangeType == types.ChangeDeleted {
+			removedSymbols := ExtractSymbolsFromDiffLines(fd.RemovedLines)
+			for _, name := range removedSymbols {
+				sym := types.ChangedSymbol{
+					File:       fd.OldPath,
+					Name:       name,
+					Type:       guessSymbolType(name, fd.RemovedLines),
+					ChangeType: types.ChangeDeleted,
+				}
+				symbols = append(symbols, sym)
+			}
+		}
 	}
 
 	return symbols, nil
+}
+
+// guessSymbolType tries to determine the symbol type from context.
+func guessSymbolType(name string, lines []string) types.BindingType {
+	for _, line := range lines {
+		if funcDeclRegex.MatchString(line) && strings.Contains(line, name) {
+			return types.BindingFunc
+		}
+		if typeRegex.MatchString(line) && strings.Contains(line, name) {
+			return types.BindingStruct
+		}
+	}
+	// Default to const for simple assignments
+	return types.BindingConst
+}
+
+// getSymbolCode retrieves the full code of a symbol from a file.
+func (e *SymbolExtractor) getSymbolCode(filePath, symbolName string) (string, int, int) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", 0, 0
+	}
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, filePath, content, parser.ParseComments)
+	if err != nil {
+		return "", 0, 0
+	}
+
+	var result string
+	var startLine, endLine int
+
+	ast.Inspect(file, func(n ast.Node) bool {
+		if n == nil {
+			return true
+		}
+
+		switch node := n.(type) {
+		case *ast.FuncDecl:
+			if node.Name.Name == symbolName {
+				result = e.nodeToString(fset, node)
+				startLine = fset.Position(node.Pos()).Line
+				endLine = fset.Position(node.End()).Line
+				return false
+			}
+		case *ast.GenDecl:
+			if node.Tok == token.CONST || node.Tok == token.VAR {
+				for _, spec := range node.Specs {
+					if vs, ok := spec.(*ast.ValueSpec); ok {
+						for _, name := range vs.Names {
+							if name.Name == symbolName {
+								result = e.nodeToString(fset, vs)
+								startLine = fset.Position(vs.Pos()).Line
+								endLine = fset.Position(vs.End()).Line
+								return false
+							}
+						}
+					}
+				}
+			} else if node.Tok == token.TYPE {
+				for _, spec := range node.Specs {
+					if ts, ok := spec.(*ast.TypeSpec); ok && ts.Name.Name == symbolName {
+						result = e.nodeToString(fset, ts)
+						startLine = fset.Position(ts.Pos()).Line
+						endLine = fset.Position(ts.End()).Line
+						return false
+					}
+				}
+			}
+		}
+		return true
+	})
+
+	return result, startLine, endLine
 }
 
 // extractSymbolsFromFile extracts changed symbols from a single file diff.

@@ -43,6 +43,10 @@ type FileDiff struct {
 	ChangeType ChangeType `json:"change_type"`
 	// ChangedLines contains the line change information.
 	ChangedLines []LineChange `json:"changed_lines"`
+	// AddedLines contains the actual added line content from diff.
+	AddedLines []string `json:"added_lines,omitempty"`
+	// RemovedLines contains the actual removed line content from diff.
+	RemovedLines []string `json:"removed_lines,omitempty"`
 }
 
 // LineChange represents a hunk of changed lines in a diff.
