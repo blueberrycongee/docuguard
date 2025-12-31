@@ -46,12 +46,9 @@ func (e *SymbolExtractor) ExtractChangedSymbols(diffContent string) ([]types.Cha
 				Type:       guessSymbolType(name, fd.AddedLines),
 				ChangeType: fd.ChangeType,
 			}
-			// Try to get the full code from the current file
-			if code, start, end := e.getSymbolCode(fd.NewPath, name); code != "" {
-				sym.NewCode = code
-				sym.StartLine = start
-				sym.EndLine = end
-			}
+			// Extract code directly from diff lines (not from local file)
+			sym.NewCode = extractSymbolCodeFromLines(name, fd.AddedLines)
+			sym.OldCode = extractSymbolCodeFromLines(name, fd.RemovedLines)
 			symbols = append(symbols, sym)
 		}
 
@@ -64,6 +61,7 @@ func (e *SymbolExtractor) ExtractChangedSymbols(diffContent string) ([]types.Cha
 					Name:       name,
 					Type:       guessSymbolType(name, fd.RemovedLines),
 					ChangeType: types.ChangeDeleted,
+					OldCode:    extractSymbolCodeFromLines(name, fd.RemovedLines),
 				}
 				symbols = append(symbols, sym)
 			}
@@ -71,6 +69,36 @@ func (e *SymbolExtractor) ExtractChangedSymbols(diffContent string) ([]types.Cha
 	}
 
 	return symbols, nil
+}
+
+// extractSymbolCodeFromLines extracts the code for a symbol from diff lines.
+func extractSymbolCodeFromLines(symbolName string, lines []string) string {
+	var codeLines []string
+	inSymbol := false
+	
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		
+		// Check if this line contains the symbol definition
+		if strings.Contains(line, symbolName) && strings.Contains(line, "=") {
+			inSymbol = true
+		}
+		
+		if inSymbol {
+			codeLines = append(codeLines, trimmed)
+			// For simple const/var assignments, one line is enough
+			if strings.Contains(line, "=") && !strings.HasSuffix(trimmed, "{") {
+				break
+			}
+		}
+		
+		// Also capture comment lines before the symbol
+		if strings.HasPrefix(trimmed, "//") && strings.Contains(trimmed, symbolName) {
+			codeLines = append(codeLines, trimmed)
+		}
+	}
+	
+	return strings.Join(codeLines, "\n")
 }
 
 // guessSymbolType tries to determine the symbol type from context.
