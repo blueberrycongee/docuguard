@@ -80,7 +80,7 @@ func runPR(cmd *cobra.Command, args []string) error {
 
 func runPRLocal() error {
 	printer := ui.NewPrinter(os.Stdout, false)
-	
+
 	printer.Info("Analyzing changes from %s...", prBaseBranch)
 	fmt.Println()
 
@@ -331,7 +331,7 @@ func outputRelevanceText(pairs []types.RelevanceResult, printer *ui.Printer) {
 		fmt.Printf("%d. %s <-> %s\n", i+1, ui.Highlight(pair.Segment.Heading), ui.Highlight(pair.Symbol.Name))
 		fmt.Printf("   Doc: %s (L%d-%d)\n", ui.Dim(pair.Segment.File), pair.Segment.StartLine, pair.Segment.EndLine)
 		fmt.Printf("   Code: %s (L%d-%d)\n", ui.Dim(pair.Symbol.File), pair.Symbol.StartLine, pair.Symbol.EndLine)
-		
+
 		confidence := pair.Confidence * 100
 		confidenceStr := fmt.Sprintf("%.0f%%", confidence)
 		if confidence >= 70 {
@@ -357,13 +357,13 @@ func outputRelevanceJSON(pairs []types.RelevanceResult) error {
 
 func outputReportText(report *types.PRReport) {
 	printer := ui.NewPrinter(os.Stdout, false)
-	
+
 	fmt.Println()
 	printer.Info("Summary:")
 	fmt.Printf("  Symbols changed: %s\n", ui.Highlight(fmt.Sprintf("%d", report.TotalSymbols)))
 	fmt.Printf("  Documents scanned: %s\n", ui.Highlight(fmt.Sprintf("%d", report.TotalSegments)))
 	fmt.Printf("  Relevant pairs: %s\n", ui.Highlight(fmt.Sprintf("%d", report.RelevantPairs)))
-	
+
 	if report.Inconsistent > 0 {
 		fmt.Printf("  Inconsistent: %s\n", ui.Error(fmt.Sprintf("%d", report.Inconsistent)))
 	} else {

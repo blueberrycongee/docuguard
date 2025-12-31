@@ -24,7 +24,7 @@ var (
 
 // Printer provides colored output functions
 type Printer struct {
-	writer io.Writer
+	writer  io.Writer
 	noColor bool
 }
 
@@ -32,7 +32,7 @@ type Printer struct {
 func NewPrinter(w io.Writer, noColor bool) *Printer {
 	color.NoColor = noColor
 	return &Printer{
-		writer: w,
+		writer:  w,
 		noColor: noColor,
 	}
 }
