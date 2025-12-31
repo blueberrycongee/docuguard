@@ -15,6 +15,7 @@ import (
 	"github.com/blueberrycongee/docuguard/internal/matcher"
 	"github.com/blueberrycongee/docuguard/internal/reporter"
 	"github.com/blueberrycongee/docuguard/internal/scanner"
+	"github.com/blueberrycongee/docuguard/internal/ui"
 	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
@@ -78,7 +79,10 @@ func runPR(cmd *cobra.Command, args []string) error {
 }
 
 func runPRLocal() error {
-	fmt.Printf("Analyzing changes from %s...\n\n", prBaseBranch)
+	printer := ui.NewPrinter(os.Stdout, false)
+	
+	printer.Info("Analyzing changes from %s...", prBaseBranch)
+	fmt.Println()
 
 	diff, err := git.GetDiffUncommitted()
 	if err != nil {
@@ -86,7 +90,7 @@ func runPRLocal() error {
 	}
 
 	if diff != "" {
-		fmt.Println("Checking uncommitted changes...")
+		printer.Info("Checking uncommitted changes...")
 	} else {
 		diff, err = git.GetDiff(prBaseBranch)
 		if err != nil {
@@ -95,7 +99,7 @@ func runPRLocal() error {
 	}
 
 	if diff == "" {
-		fmt.Println("No changes detected")
+		printer.Warning("No changes detected")
 		return nil
 	}
 
@@ -106,7 +110,7 @@ func runPRLocal() error {
 	}
 
 	if len(symbols) == 0 {
-		fmt.Println("No Go symbol changes detected")
+		printer.Warning("No Go symbol changes detected")
 		return nil
 	}
 
@@ -114,29 +118,32 @@ func runPRLocal() error {
 		if prFormat == "json" {
 			return outputSymbolsJSON(symbols)
 		}
-		outputSymbolsText(symbols)
-		fmt.Println("\nUse without --dry-run to check documentation consistency")
+		outputSymbolsText(symbols, printer)
+		fmt.Println()
+		printer.Info("Use without --dry-run to check documentation consistency")
 		return nil
 	}
 
-	fmt.Println("Scanning documentation...")
+	printer.Info("Scanning documentation...")
 	segments, err := scanner.ScanMarkdownDir(".", prDocs)
 	if err != nil {
 		return fmt.Errorf("failed to scan documents: %w", err)
 	}
 
 	if len(segments) == 0 {
-		fmt.Println("No documentation found matching patterns")
+		printer.Warning("No documentation found matching patterns")
 		return nil
 	}
-	fmt.Printf("Found %d document segments\n\n", len(segments))
+	printer.Success("Found %d document segments", len(segments))
+	fmt.Println()
 
-	fmt.Println("Finding relevant documentation...")
+	printer.Info("Finding relevant documentation...")
 	relevantPairs := matcher.QuickMatch(symbols, segments)
-	fmt.Printf("Found %d potential matches\n\n", len(relevantPairs))
+	printer.Success("Found %d potential matches", len(relevantPairs))
+	fmt.Println()
 
 	if len(relevantPairs) == 0 {
-		fmt.Println("No documentation appears to be affected by these changes")
+		printer.Success("No documentation appears to be affected by these changes")
 		return nil
 	}
 
@@ -145,13 +152,13 @@ func runPRLocal() error {
 		if err == nil && cfg.LLM.APIKey != "" {
 			return runPRWithLLM(cfg, diff)
 		}
-		fmt.Println("No LLM configured, using keyword matching only")
+		printer.Warning("No LLM configured, using keyword matching only")
 	}
 
 	if prFormat == "json" {
 		return outputRelevanceJSON(relevantPairs)
 	}
-	outputRelevanceText(relevantPairs)
+	outputRelevanceText(relevantPairs, printer)
 
 	return nil
 }
@@ -287,18 +294,20 @@ func runPRGitHub() error {
 	return nil
 }
 
-func outputSymbolsText(symbols []types.ChangedSymbol) {
-	fmt.Printf("Found %d changed symbol(s):\n\n", len(symbols))
+func outputSymbolsText(symbols []types.ChangedSymbol, printer *ui.Printer) {
+	printer.Success("Found %d changed symbol(s):", len(symbols))
+	fmt.Println()
 
 	for i, sym := range symbols {
 		icon := getChangeIcon(sym.ChangeType)
-		fmt.Printf("%d. [%s] %s %s (%s)\n", i+1, icon, sym.Type, sym.Name, sym.File)
-		fmt.Printf("   Lines: %d-%d\n", sym.StartLine, sym.EndLine)
+		changeColor := getChangeColor(sym.ChangeType)
+		fmt.Printf("%d. [%s] %s %s (%s)\n", i+1, changeColor(icon), sym.Type, ui.Highlight(sym.Name), ui.Dim(sym.File))
+		fmt.Printf("   Lines: %s\n", ui.Dim(fmt.Sprintf("%d-%d", sym.StartLine, sym.EndLine)))
 
 		if sym.NewCode != "" && len(sym.NewCode) < 200 {
 			fmt.Printf("   Code:\n")
 			for _, line := range splitLines(sym.NewCode, 3) {
-				fmt.Printf("      %s\n", line)
+				fmt.Printf("      %s\n", ui.Dim(line))
 			}
 		}
 		fmt.Println()
@@ -314,15 +323,25 @@ func outputSymbolsJSON(symbols []types.ChangedSymbol) error {
 	})
 }
 
-func outputRelevanceText(pairs []types.RelevanceResult) {
-	fmt.Println("Documentation that may need review:")
+func outputRelevanceText(pairs []types.RelevanceResult, printer *ui.Printer) {
+	printer.Info("Documentation that may need review:")
 	fmt.Println()
 
 	for i, pair := range pairs {
-		fmt.Printf("%d. %s <-> %s\n", i+1, pair.Segment.Heading, pair.Symbol.Name)
-		fmt.Printf("   Doc: %s (L%d-%d)\n", pair.Segment.File, pair.Segment.StartLine, pair.Segment.EndLine)
-		fmt.Printf("   Code: %s (L%d-%d)\n", pair.Symbol.File, pair.Symbol.StartLine, pair.Symbol.EndLine)
-		fmt.Printf("   Confidence: %.0f%%\n", pair.Confidence*100)
+		fmt.Printf("%d. %s <-> %s\n", i+1, ui.Highlight(pair.Segment.Heading), ui.Highlight(pair.Symbol.Name))
+		fmt.Printf("   Doc: %s (L%d-%d)\n", ui.Dim(pair.Segment.File), pair.Segment.StartLine, pair.Segment.EndLine)
+		fmt.Printf("   Code: %s (L%d-%d)\n", ui.Dim(pair.Symbol.File), pair.Symbol.StartLine, pair.Symbol.EndLine)
+		
+		confidence := pair.Confidence * 100
+		confidenceStr := fmt.Sprintf("%.0f%%", confidence)
+		if confidence >= 70 {
+			confidenceStr = ui.Success(confidenceStr)
+		} else if confidence >= 40 {
+			confidenceStr = ui.Warning(confidenceStr)
+		} else {
+			confidenceStr = ui.Dim(confidenceStr)
+		}
+		fmt.Printf("   Confidence: %s\n", confidenceStr)
 		fmt.Println()
 	}
 }
@@ -337,23 +356,31 @@ func outputRelevanceJSON(pairs []types.RelevanceResult) error {
 }
 
 func outputReportText(report *types.PRReport) {
-	fmt.Println("\nSummary:")
-	fmt.Printf("  Symbols changed: %d\n", report.TotalSymbols)
-	fmt.Printf("  Documents scanned: %d\n", report.TotalSegments)
-	fmt.Printf("  Relevant pairs: %d\n", report.RelevantPairs)
-	fmt.Printf("  Inconsistent: %d\n", report.Inconsistent)
-	fmt.Printf("  Time: %dms\n", report.ExecutionTimeMs)
+	printer := ui.NewPrinter(os.Stdout, false)
+	
+	fmt.Println()
+	printer.Info("Summary:")
+	fmt.Printf("  Symbols changed: %s\n", ui.Highlight(fmt.Sprintf("%d", report.TotalSymbols)))
+	fmt.Printf("  Documents scanned: %s\n", ui.Highlight(fmt.Sprintf("%d", report.TotalSegments)))
+	fmt.Printf("  Relevant pairs: %s\n", ui.Highlight(fmt.Sprintf("%d", report.RelevantPairs)))
+	
+	if report.Inconsistent > 0 {
+		fmt.Printf("  Inconsistent: %s\n", ui.Error(fmt.Sprintf("%d", report.Inconsistent)))
+	} else {
+		fmt.Printf("  Inconsistent: %s\n", ui.Success("0"))
+	}
+	fmt.Printf("  Time: %s\n", ui.Dim(fmt.Sprintf("%dms", report.ExecutionTimeMs)))
 
 	if report.Inconsistent > 0 {
 		fmt.Println()
-		fmt.Println("Inconsistencies found:")
+		printer.Warning("Inconsistencies found:")
 		fmt.Println()
 		for _, r := range report.Results {
 			if !r.Consistent {
-				fmt.Printf("  - %s <-> %s\n", r.Segment.Heading, r.Symbol.Name)
-				fmt.Printf("    Reason: %s\n", r.Reason)
+				fmt.Printf("  - %s <-> %s\n", ui.Highlight(r.Segment.Heading), ui.Highlight(r.Symbol.Name))
+				fmt.Printf("    %s: %s\n", ui.Error("Reason"), r.Reason)
 				if r.Suggestion != "" {
-					fmt.Printf("    Suggestion: %s\n", r.Suggestion)
+					fmt.Printf("    %s: %s\n", ui.Info("Suggestion"), r.Suggestion)
 				}
 				fmt.Println()
 			}
@@ -377,6 +404,19 @@ func getChangeIcon(ct types.ChangeType) string {
 		return "-"
 	default:
 		return "?"
+	}
+}
+
+func getChangeColor(ct types.ChangeType) func(a ...interface{}) string {
+	switch ct {
+	case types.ChangeAdded:
+		return ui.Success
+	case types.ChangeModified:
+		return ui.Warning
+	case types.ChangeDeleted:
+		return ui.Error
+	default:
+		return ui.Dim
 	}
 }
 
