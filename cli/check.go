@@ -50,10 +50,7 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	var files []string
 	if checkAll {
 		// Expand glob patterns to actual file paths
-		files, err = expandGlobPatterns(".", cfg.Scan.Include)
-		if err != nil {
-			return fmt.Errorf("failed to expand patterns: %w", err)
-		}
+		files = expandGlobPatterns(".", cfg.Scan.Include)
 		if len(files) == 0 {
 			return fmt.Errorf("no files found matching patterns: %v", cfg.Scan.Include)
 		}
@@ -94,18 +91,14 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-
 // expandGlobPatterns expands glob patterns to actual file paths.
-func expandGlobPatterns(rootDir string, patterns []string) ([]string, error) {
+func expandGlobPatterns(rootDir string, patterns []string) []string {
 	seen := make(map[string]bool)
 	var files []string
 
 	for _, pattern := range patterns {
 		fullPattern := filepath.Join(rootDir, pattern)
-		matches, err := filepath.Glob(fullPattern)
-		if err != nil {
-			continue
-		}
+		matches, _ := filepath.Glob(fullPattern)
 
 		for _, match := range matches {
 			info, err := os.Stat(match)
@@ -132,5 +125,5 @@ func expandGlobPatterns(rootDir string, patterns []string) ([]string, error) {
 		}
 	}
 
-	return files, nil
+	return files
 }
