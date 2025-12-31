@@ -9,22 +9,25 @@ type User struct {
 	Email string
 }
 
-// CreateUser creates a new user with the given name and email.
+// CreateUser creates a new user with the given name.
+// Email will be auto-generated based on the name.
 // Returns the created user and an error if validation fails.
-func CreateUser(name, email string) (*User, error) {
+func CreateUser(name string) (*User, error) {
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
-	}
-	if email == "" {
-		return nil, errors.New("email cannot be empty")
 	}
 
 	user := &User{
 		ID:    generateID(),
 		Name:  name,
-		Email: email,
+		Email: generateEmail(name),
 	}
 	return user, nil
+}
+
+func generateEmail(name string) string {
+	// Auto-generate email from name
+	return name + "@example.com"
 }
 
 // GetUserByID retrieves a user by their ID.
