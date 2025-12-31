@@ -24,7 +24,7 @@ type Payment struct {
 
 const (
 	// FreeShippingThreshold is the minimum order amount for free shipping.
-	FreeShippingThreshold = 1000.0
+	FreeShippingThreshold = 500.0
 	
 	// StandardShippingFee is the standard shipping cost.
 	StandardShippingFee = 50.0
