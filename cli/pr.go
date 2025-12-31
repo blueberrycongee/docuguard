@@ -223,7 +223,11 @@ func runPRGitHub() error {
 		return fmt.Errorf("failed to get PR files: %w", err)
 	}
 
-	diff := github.BuildDiffFromFiles(files)
+	// Try to get full diff first (more accurate), fallback to patch from files
+	diff, err := ghClient.GetPRDiff(prNumber)
+	if err != nil || diff == "" {
+		diff = github.BuildDiffFromFiles(files)
+	}
 	if diff == "" {
 		fmt.Println("No changes detected")
 		return nil

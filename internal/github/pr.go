@@ -3,6 +3,7 @@ package github
 import (
 	"fmt"
 	"io"
+	"net/http"
 )
 
 // PRInfo contains information about a pull request.
@@ -82,9 +83,18 @@ func (c *Client) GetPRFiles(prNumber int) ([]PRFile, error) {
 
 // GetPRDiff retrieves the diff content of a pull request.
 func (c *Client) GetPRDiff(prNumber int) (string, error) {
-	path := fmt.Sprintf("/repos/%s/%s/pulls/%d", c.owner, c.repo, prNumber)
+	url := fmt.Sprintf("%s/repos/%s/%s/pulls/%d", c.baseURL, c.owner, c.repo, prNumber)
 
-	resp, err := c.doRequest("GET", path+".diff", nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Accept", "application/vnd.github.v3.diff")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return "", err
 	}
