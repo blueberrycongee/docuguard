@@ -3,9 +3,10 @@ package parser
 import (
 	"testing"
 
-	"github.com/blueberrycongee/docuguard/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 func TestExtractBindings(t *testing.T) {

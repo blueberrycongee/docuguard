@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/blueberrycongee/docuguard/pkg/types"
 	"github.com/fatih/color"
+
+	"github.com/blueberrycongee/docuguard/pkg/types"
 )
 
 // TextReporter outputs results in human-readable text format.
