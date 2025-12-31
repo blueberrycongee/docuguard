@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities to: security@example.com
+Please report security vulnerabilities to: lpageo@163.com
 
 Do not open public issues for security vulnerabilities.
 

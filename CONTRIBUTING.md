@@ -6,7 +6,7 @@ Thank you for your interest in contributing to DocuGuard!
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourname/docuguard.git
+   git clone https://github.com/blueberrycongee/docuguard.git
    cd docuguard
    ```
 

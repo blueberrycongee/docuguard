@@ -1,6 +1,6 @@
 name: 'DocuGuard PR Check'
 description: 'Check documentation-code consistency in pull requests'
-author: 'yourname'
+author: 'blueberrycongee'
 
 branding:
   icon: 'file-text'

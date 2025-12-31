@@ -33,9 +33,9 @@ jobs:
           DATE: ${{ github.event.head_commit.timestamp }}
         run: |
           mkdir -p dist
-          LDFLAGS="-X github.com/yourname/docuguard/cli.Version=${VERSION} \
-                   -X github.com/yourname/docuguard/cli.GitCommit=${COMMIT:0:7} \
-                   -X github.com/yourname/docuguard/cli.BuildDate=${DATE}"
+          LDFLAGS="-X github.com/blueberrycongee/docuguard/cli.Version=${VERSION} \
+                   -X github.com/blueberrycongee/docuguard/cli.GitCommit=${COMMIT:0:7} \
+                   -X github.com/blueberrycongee/docuguard/cli.BuildDate=${DATE}"
           
           # Linux
           GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o dist/docuguard-linux-amd64 ./cmd/docuguard
