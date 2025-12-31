@@ -164,15 +164,28 @@ docuguard init
 
 ## How It Works
 
-### Two-Stage Matching (Recommended)
+### PR Bot Mode
 
 ```
-Code Changes → Extract Symbols → [Stage 1: Broad Match] → Candidates → [Stage 2: LLM Filter] → Relevant Docs → [Stage 3: Consistency Check]
+PR Diff → Parse Changed Lines → Extract Symbols & Code → Match Documents → LLM Consistency Check
+```
+
+1. **Get PR Diff**: Fetches diff from GitHub API (or local git diff)
+2. **Extract Symbols**: Parses diff lines to extract changed symbol names and their code directly from the diff (not from local files)
+3. **Match Documents**: Finds related documentation using keyword matching
+4. **LLM Check**: Verifies if documentation matches the new code implementation
+
+### Two-Stage Matching (with `--two-stage` flag)
+
+For better accuracy, use the two-stage matching mode:
+
+```
+Symbols → [Stage 1: Broad Match] → Candidates → [Stage 2: LLM Filter] → Relevant Docs → Consistency Check
 ```
 
 1. **Stage 1 - Broad Match**: Uses multiple strategies (exact name, code blocks, keywords, partial match) to find candidate documents
 2. **Stage 2 - LLM Filter**: Batch checks candidates with LLM to filter truly relevant documents
-3. **Stage 3 - Consistency Check**: Verifies if documentation matches code implementation
+3. **Consistency Check**: Verifies if documentation matches code implementation
 
 ### Supported Bindings
 
