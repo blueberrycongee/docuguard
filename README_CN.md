@@ -1,16 +1,20 @@
+<div align="center">
+
+<img src=".github/assets/image.png" alt="DocuGuard" width="800">
+
 # DocuGuard
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go" alt="Go Version">
-  <a href="https://github.com/blueberrycongee/docuguard/actions"><img src="https://github.com/blueberrycongee/docuguard/actions/workflows/ci.yml/badge.svg?branch=main" alt="Build Status"></a>
-  <a href="https://goreportcard.com/report/github.com/blueberrycongee/docuguard"><img src="https://goreportcard.com/badge/github.com/blueberrycongee/docuguard" alt="Go Report Card"></a>
-  <a href="https://pkg.go.dev/github.com/blueberrycongee/docuguard"><img src="https://pkg.go.dev/badge/github.com/blueberrycongee/docuguard.svg" alt="Go Reference"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
-</p>
+[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![Build Status](https://github.com/blueberrycongee/docuguard/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/blueberrycongee/docuguard/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/blueberrycongee/docuguard)](https://goreportcard.com/report/github.com/blueberrycongee/docuguard)
+[![Go Reference](https://pkg.go.dev/badge/github.com/blueberrycongee/docuguard.svg)](https://pkg.go.dev/github.com/blueberrycongee/docuguard)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-<p align="center">
-  <a href="README.md">English</a> | <b>中文</b>
-</p>
+[English](README.md) | **中文**
+
+</div>
+
+---
 
 轻量级文档-代码一致性检查工具，基于 LLM 语义分析自动检测文档与代码实现之间的冲突。
 
